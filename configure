@@ -1,0 +1,12 @@
+#!/bin/bash
+
+ACCIRR_HOME=`pwd`
+
+if [ -e application/Makefile ]; then
+	echo application/Makefile exists
+else
+	cp application/Makefile.ini application/Makefile
+	sed -i 's#ACCIRR_HOME := \([A-Za-z\/]*\)#ACCIRR_HOME := '$ACCIRR_HOME'#g' $ACCIRR_HOME/application/Makefile
+	echo created application/Makefile
+fi
+
