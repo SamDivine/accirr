@@ -5,9 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <string>
 #include <sys/time.h>
 
-#define WEBUI
+//#define WEBUI
 
 #ifdef WEBUI
 #include <sqlite3.h>
@@ -31,15 +32,6 @@
 #ifndef READYQ_PREFETCH_DISTANCE
 #define READYQ_PREFETCH_DISTANCE 4
 #endif
-
-struct timeval jobStart, jobNow;
-struct timeval taskStart, taskNow;
-
-double nsec(const timeval& start, timeval& end) {
-	gettimeofday(&end, NULL);
-	return (end.tv_sec-start.tv_usec)+(end.tv_usec-start.tv_usec)/1000000.0;
-}
-
 
 #endif //_COMMON_H
 

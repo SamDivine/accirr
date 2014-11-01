@@ -205,6 +205,15 @@ inline void yield_wake(Worker *t) {
 inline void suspend_wake(Worker *t) {
 	global_scheduler.thread_suspend_wake(t);
 }
+extern struct timeval jobStart, jobNow;
+extern struct timeval taskStart, taskNow;
+
+double nsec(const timeval& start, timeval& end); /*{
+	gettimeofday(&end, NULL);
+	return (end.tv_sec-start.tv_usec)+(end.tv_usec-start.tv_usec)/1000000.0;
+}*/
+
+extern std::string ACCIRR_HOME;//="/path/to/accirr";
 
 
 #endif //_TASK_SCHEDULER_H
