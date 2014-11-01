@@ -1,0 +1,21 @@
+CXX=g++
+
+LIB=stack.o Worker.cpp TaskScheduler.cpp Accirr.cpp
+
+ACCIRR_HOME := /path/to/accirr
+
+vpath %.cpp $(ACCIRR_HOME)/system
+vpath %.o $(ACCIRR_HOME)/system
+
+CXXFLAGS+= -O2 -I$(ACCIRR_HOME)/system
+
+all:$(TARGET)
+
+$(TARGET):$(LIB)
+
+.PHONY:clean
+clean:
+	rm -f $(TARGET)
+
+
+
