@@ -205,8 +205,11 @@ inline void yield_wake(Worker *t) {
 inline void suspend_wake(Worker *t) {
 	global_scheduler.thread_suspend_wake(t);
 }
+
+//for WEBUI mainly
 extern struct timeval jobStart, jobNow;
 extern struct timeval taskStart, taskNow;
+extern int64_t totalSwitches;
 
 double nsec(const timeval& start, timeval& end); /*{
 	gettimeofday(&end, NULL);
@@ -214,6 +217,7 @@ double nsec(const timeval& start, timeval& end); /*{
 }*/
 
 extern std::string ACCIRR_HOME;//="/path/to/accirr";
+//
 
 
 #endif //_TASK_SCHEDULER_H
