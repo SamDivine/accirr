@@ -1,9 +1,9 @@
 #!/bin/bash
 
 COROS="1 2 4 8 12 16"
-REPEAT=2
+REPEAT=8
 MODE="0 1"
-LOCALITY="0 1"
+LOCALITY="0 1 2 3"
 
 OUTPUT="accirr_pttest.csv"
 

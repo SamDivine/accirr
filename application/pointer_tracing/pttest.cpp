@@ -7,7 +7,7 @@
 
 int CORO_NUM = 2;
 int TOTAL_LISTS = (1<<11);
-int LIST_LEN = (1<<16);
+int LIST_LEN = (1<<14);
 int REPEAT_TIMES = 1;
 
 #define USING_MALLOC

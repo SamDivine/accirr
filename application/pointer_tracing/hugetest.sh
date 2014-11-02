@@ -3,7 +3,7 @@
 COROS="1 2 4 8 12 16"
 REPEAT=8
 MODE="0 1"
-LOCALITY="0 1"
+LOCALITY="0 1 2 3"
 
 OUTPUT="accirr_pttest_hugepage.csv"
 
@@ -23,7 +23,7 @@ for i in $MODE; do
 		./gen.sh $i $j
 		for k in $COROS; do
 			echo run pttest with $k coro, mode $i, locality $j
-			RST=$RST","`LD_PRELOAD=../../lib/libhugetlbfs.so HUGETLB_MORECORE=yes ./pttest $k $REPEAT | awk '{time=$3/1000000} { printf("%.2f", time);}'`
+			RST=$RST","`LD_PRELOAD=../../lib/libhugetlbfs.so HUGETLB_MORECORE=1g ./pttest $k $REPEAT | awk '{time=$3/1000000} { printf("%.2f", time);}'`
 		done
 		echo $RST >> $OUTPUT
 	done

@@ -2,6 +2,9 @@
 
 ACCIRR_HOME=`pwd`
 
+cd system && make
+cd ..
+
 if [ -e application/Makefile ]; then
 	echo application/Makefile exists
 else
