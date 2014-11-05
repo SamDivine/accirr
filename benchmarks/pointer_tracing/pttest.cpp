@@ -9,7 +9,7 @@
 
 int THREAD_NUM = 2;
 int TOTAL_LISTS = (1<<11);
-int LIST_LEN = (1<<14);
+int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
 
 #define USING_MALLOC
@@ -172,6 +172,7 @@ int main(int argc, char** argv)
 	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
 		std::cerr << "could not set CPU affinity in main thread " << std::endl;
 	}
+	std::cerr << "bind to core " << processorid << std::endl;
 	omp_set_num_threads(THREAD_NUM);
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));

@@ -8,7 +8,7 @@
 
 int TOGETHER_NUM = 2;
 int TOTAL_LISTS = (1<<11);
-int LIST_LEN = (1<<14);
+int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
 
 #define USING_MALLOC
