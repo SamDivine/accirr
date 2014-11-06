@@ -5,6 +5,6 @@ MODE := -DPREFECH_MODE=1
 LOCALICY := -DPREFETCH_LOCALITY=3
 
 CXXFLAGS += $(PREFETCH) $(MODE) $(LOCALICY)
-TARGET=pointer_tracing old_pointer_tracing pttest mppttest
+TARGET=pointer_tracing old_pointer_tracing pttest mppttest pcm_pttest
 include ../Makefile
 

@@ -72,6 +72,28 @@ typedef signed int int32;
 
 // Event IDs
 
+// Events on XEON Family
+#define MEM_LOAD_RETIRED_DTLB_MISS_EVTNR	(0xCB)
+#define MEM_LOAD_RETIRED_DTLB_MISS_UMASK	(0x80)
+
+#define MEM_LOAD_RETIRED_L1D_HIT_EVTNR	(0xCB)
+#define MEM_LOAD_RETIRED_L1D_HIT_UMASK	(0x01)
+
+#define DTLB_LOAD_MISS_ANY_EVTNR	(0x08)
+#define DTLB_LOAD_MISS_ANY_UMASK	(0x01)
+
+#define DTLB_MISS_ANY_EVTNR	(0x49)
+#define DTLB_MISS_ANY_UMASK	(0x01)
+
+#define L2_RQSTS_LOAD_HIT_EVTNR	(0x24)
+#define L2_RQSTS_LOAD_HIT_UMASK	(0x01)
+
+#define L2_RQSTS_LOAD_MISS_EVTNR	(0x24)
+#define L2_RQSTS_LOAD_MISS_UMASK	(0x02)
+
+#define L2_RQSTS_LOADS_EVTNR	(0x24)
+#define L2_RQSTS_LOADS_UMASK	(0x03)
+
 // Nehalem/Westmere on-core events
 #define MEM_LOAD_RETIRED_L3_MISS_EVTNR  (0xCB)
 #define MEM_LOAD_RETIRED_L3_MISS_UMASK  (0x10)
