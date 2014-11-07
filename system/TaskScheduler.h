@@ -207,16 +207,7 @@ inline void suspend_wake(Worker *t) {
 }
 
 //for WEBUI mainly
-extern struct timeval jobStart, jobNow;
-extern struct timeval taskStart, taskNow;
-extern int64_t totalSwitches;
-
-double nsec(const timeval& start, timeval& end); /*{
-	gettimeofday(&end, NULL);
-	return (end.tv_sec-start.tv_usec)+(end.tv_usec-start.tv_usec)/1000000.0;
-}*/
-
-extern std::string ACCIRR_HOME;//="/path/to/accirr";
+double nsec(const timeval& start, timeval& end); 
 //
 
 
