@@ -189,14 +189,14 @@ int main(int argc, char** argv)
 	PCM *m = PCM::getInstance();
 	PCM::CustomCoreEventDescription mEvents[4];
 	uint64_t mCounts[4];
-	mEvents[0].event_number = DTLB_MISS_ANY_EVTNR;
-	mEvents[0].umask_value = DTLB_MISS_ANY_UMASK;
-	mEvents[1].event_number = L2_RQSTS_LOAD_HIT_EVTNR;
-	mEvents[1].umask_value = L2_RQSTS_LOAD_HIT_UMASK;
-	mEvents[2].event_number = L2_RQSTS_LOAD_MISS_EVTNR;
-	mEvents[2].umask_value = L2_RQSTS_LOAD_MISS_UMASK;
-	mEvents[3].event_number = L2_RQSTS_LOADS_EVTNR;
-	mEvents[3].umask_value = L2_RQSTS_LOADS_UMASK;
+	mEvents[0].event_number = DTLB_LOAD_MISS_CAUSE_WALK_EVTNR;
+	mEvents[0].umask_value = DTLB_LOAD_MISS_CAUSE_WALK_UMASK;
+	mEvents[1].event_number = DTLB_STORE_MISS_CAUSE_WALK_EVTNR;
+	mEvents[1].umask_value = DTLB_STORE_MISS_CAUSE_WALK_UMASK;
+	mEvents[2].event_number = L2_RQSTS_DEMAND_DATA_RD_HIT_EVTNR;
+	mEvents[2].umask_value = L2_RQSTS_DEMAND_DATA_RD_HIT_UMASK;
+	mEvents[3].event_number = L2_RQSTS_ALL_DEMAND_DATA_RD_EVTNR;
+	mEvents[3].umask_value = L2_RQSTS_ALL_DEMAND_DATA_RD_UMASK;
 	if (m->good()) {
 		m->resetPMU();
 		m->program(PCM::CUSTOM_CORE_EVENTS, &mEvents);
@@ -235,13 +235,13 @@ int main(int argc, char** argv)
 	for (int i = 0; i < 4; i++) {
 		mCounts[i] = getNumberOfCustomEvents(i, sstate1, sstate2);
 	}
-	double tlbMissPerSec = mCounts[0]/duration;
-	double l2Hit = mCounts[1];
-	double l2Miss = mCounts[2];
+	double tlbLoadMissPerSec = mCounts[0]/duration;
+	double tlbStoreMissPerSec = mCounts[1]/duration;
+	double l2Hit = mCounts[2];
 	double l2Load = mCounts[3];
 	double l2HitRatio = l2Hit/l2Load;
-	std::cout << "traverse duration " << duration << "s tlbmiss/s " << tlbMissPerSec << " l2hit,miss,load,hitratio " << l2Hit << ", " << l2Miss << ", " << l2Load << ", " << l2HitRatio << std::endl;
-	std::cerr << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times <<  " tlbmiss/s " << tlbMissPerSec << " l2hit,miss,load,hitratio " << l2Hit << ", " << l2Miss << ", " << l2Load << ", " << l2HitRatio << std::endl;
+	std::cout << "traverse duration " << duration << "s tlbloadmiss/s " << tlbLoadMissPerSec << " tlbstoremiss/s " << tlbStoreMissPerSec << " l2hit,load,hitratio " << l2Hit << ", " << l2Load << ", " << l2HitRatio << std::endl;
+	std::cerr << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times <<  " tlbloadmiss/s " << tlbLoadMissPerSec << " tlbstoremiss/s " << tlbStoreMissPerSec << " l2hit,load,hitratio " << l2Hit << ", " << l2Load << ", " << l2HitRatio << std::endl;
 
 	destroyList();
 
