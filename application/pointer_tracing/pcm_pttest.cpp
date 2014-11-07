@@ -2,8 +2,10 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <unistd.h>
-
 #include <sched.h>
+
+#include "cpucounters.h"
+#include "utils.h"
 
 int CORO_NUM = 2;
 int TOTAL_LISTS = (1<<11);
@@ -162,6 +164,7 @@ void destroyList() {
 
 int main(int argc, char** argv)
 {
+	set_signal_handlers();
     switch(argc) {
     case 5:
         LIST_LEN = (1<<atoi(argv[4]));
@@ -183,6 +186,24 @@ int main(int argc, char** argv)
 	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
 		std::cerr << "could not set CPU affinity in main thread " << std::endl;
 	}
+	PCM *m = PCM::getInstance();
+	PCM::CustomCoreEventDescription mEvents[4];
+	uint64_t mCounts[4];
+	mEvents[0].event_number = DTLB_MISS_ANY_EVTNR;
+	mEvents[0].umask_value = DTLB_MISS_ANY_UMASK;
+	mEvents[1].event_number = L2_RQSTS_LOAD_HIT_EVTNR;
+	mEvents[1].umask_value = L2_RQSTS_LOAD_HIT_UMASK;
+	mEvents[2].event_number = L2_RQSTS_LOAD_MISS_EVTNR;
+	mEvents[2].umask_value = L2_RQSTS_LOAD_MISS_UMASK;
+	mEvents[3].event_number = L2_RQSTS_LOADS_EVTNR;
+	mEvents[3].umask_value = L2_RQSTS_LOADS_UMASK;
+	if (m->good()) {
+		m->resetPMU();
+		m->program(PCM::CUSTOM_CORE_EVENTS, &mEvents);
+	} else {
+		std::cerr << "can't access PMU" << std::endl;
+		return -1;
+	}
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
     allList = (List**)malloc(TOTAL_LISTS*sizeof(List*));
@@ -198,19 +219,29 @@ int main(int argc, char** argv)
 	gettimeofday(&start, NULL);
 	buildList();
 	gettimeofday(&end, NULL);
-	long duration = 1000000*(end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec);
+	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
 	//getchar();
 	for (intptr_t i = 0; i < CORO_NUM; i++) {
 		createTask(tracingTask, (void*)i);
 	}
 	gettimeofday(&start, NULL);
+	SystemCounterState sstate1 = getSystemCounterState();
 	AccirrRun();
 	AccirrFinalize();
+	SystemCounterState sstate2 = getSystemCounterState();
 	gettimeofday(&end, NULL);
-	duration = 1000000*(end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec);
-	std::cout << "traverse duration " << duration << " us accum " << total_accum << " traverse " << tra_times << std::endl;
-	std::cerr << "traverse duration " << duration << " us accum " << total_accum << " traverse " << tra_times << std::endl;
+	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
+	for (int i = 0; i < 4; i++) {
+		mCounts[i] = getNumberOfCustomEvents(i, sstate1, sstate2);
+	}
+	double tlbMissPerSec = mCounts[0]/duration;
+	double l2Hit = mCounts[1];
+	double l2Miss = mCounts[2];
+	double l2Load = mCounts[3];
+	double l2HitRatio = l2Hit/l2Load;
+	std::cout << "traverse duration " << duration << "s tlbmiss/s " << tlbMissPerSec << " l2hit,miss,load,hitratio " << l2Hit << ", " << l2Miss << ", " << l2Load << ", " << l2HitRatio << std::endl;
+	std::cerr << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times <<  " tlbmiss/s " << tlbMissPerSec << " l2hit,miss,load,hitratio " << l2Hit << ", " << l2Miss << ", " << l2Load << ", " << l2HitRatio << std::endl;
 
 	destroyList();
 
