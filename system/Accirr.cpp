@@ -7,23 +7,56 @@ Worker *master_thread;
 double programStart;
 double prevPoint;
 double presentPoint;
-uint64_t maxWorkerNum;
+unsigned long long maxWorkerNum;
 char programName[256];
 sqlite3 *db;
 char* errMsg;
 
 char dbFile[] = "/home/samdivine/programming/accirr/webui/accirr.db";
+char timeInText[20];
+void getSystemTime(timeval pNow) {
+	int year = 1970, month = 1, day = 1, hour = 0, minute = 0, second = 0;
+	int daySec = 86400;
+	int daysMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+	long pSec = pNow.tv_sec;
+	pSec += 8*3600;
+	long pUsec= pNow.tv_usec;
+	int dayMore = ((year%100==0 && year%400==0) || year%4==0);
+	int daysYear = dayMore + 365;
+	int daysPassed = pSec / daySec;
+	while (daysPassed >= daysYear) {
+		daysPassed -= daysYear;
+		year++;
+		dayMore = ((year%100==0 && year%400==0) || year%4==0);
+		daysYear = dayMore + 365;
+	}
+	int realDays;
+	while ((realDays = daysMonth[month-1]+(month==2&&dayMore==1)) <= daysPassed) {
+		daysPassed -= realDays;
+		month++;
+	}
+	day += daysPassed;
+	int secInDay = pSec % daySec;
+	hour = secInDay/3600;
+	secInDay %= 3600;
+	minute = secInDay/60;
+	secInDay %= 60;
+	second = secInDay;
+	int ms = pUsec/1000;
+	sprintf(timeInText, "%d%.2d%.2d%.2d%.2d%.2d%.3d", year, month, day, hour, minute, second, ms);
+}
 #endif
 
 void AccirrInit(int *argc_p, char **argv_p[]) {
 	master_thread = convert_to_master();
 #ifdef WEBUI
-	programStart = asecd();
+	timeval pNow;
+	programStart = asecd(&pNow);
 	prevPoint = programStart;
-	unsigned long long startInSec = programStart * 100;
 	maxWorkerNum = 0;
 	errMsg = NULL;
-	sprintf(programName, "%s_%llu", strrchr((*argv_p)[0], '/')+1, startInSec);
+	getSystemTime(pNow);
+	sprintf(programName, "%s_%s", strrchr((*argv_p)[0], '/')+1, timeInText);
 	for (int i = 1; i < *argc_p; i++) {
 		sprintf(programName, "%s_%s", programName, (*argv_p)[i]);
 	}
@@ -33,12 +66,12 @@ void AccirrInit(int *argc_p, char **argv_p[]) {
 		sqlite3_close(db);
 		exit(-1);
 	}
-	if ((rc = sqlite3_exec(db, "CREATE TABLE RUNNING_TBL (PROGRAM TEXT PRIMARY KEY, STARTTIME REAL);", NULL, NULL, &errMsg)) != SQLITE_OK) {
+	if ((rc = sqlite3_exec(db, "CREATE TABLE RUNNING_TBL (PROGRAM TEXT PRIMARY KEY, STARTTIME TEXT);", NULL, NULL, &errMsg)) != SQLITE_OK) {
 		fprintf(stderr, "SQL error at create running table: %s\n", errMsg);
 		sqlite3_free(errMsg);
 	}
 	char cmd[256];
-	sprintf(cmd, "INSERT INTO RUNNING_TBL (PROGRAM, STARTTIME) VALUES ('%s', %.2f);", programName, programStart);
+	sprintf(cmd, "INSERT INTO RUNNING_TBL (PROGRAM, STARTTIME) VALUES ('%s', %s);", programName, timeInText);
 	if ((rc = sqlite3_exec(db, cmd, NULL, NULL, &errMsg)) != SQLITE_OK) {
 		fprintf(stderr, "SQL error at insert into running table: %s\n", errMsg);
 		sqlite3_free(errMsg);
@@ -59,15 +92,17 @@ void createTask(thread_func f, void *arg) {
 
 int AccirrFinalize() {
 #ifdef WEBUI
-	presentPoint = asecd();
+	timeval pNow;
+	presentPoint = asecd(&pNow);
 	double execTime = presentPoint-programStart;
 	int rc;
-	if ((rc = sqlite3_exec(db, "CREATE TABLE FINISHED_TBL (PROGRAM TEXT PRIMARY KEY, EXECTIME REAL, MAXWORKERS INTEGER, FINISHTIME REAL);", NULL, NULL, &errMsg)) != SQLITE_OK) {
+	if ((rc = sqlite3_exec(db, "CREATE TABLE FINISHED_TBL (PROGRAM TEXT PRIMARY KEY, EXECTIME REAL, MAXWORKERS INTEGER, FINISHTIME TEXT);", NULL, NULL, &errMsg)) != SQLITE_OK) {
 		fprintf(stderr, "SQL error at create finished table: %s\n", errMsg);
 		sqlite3_free(errMsg);
 	}
 	char cmd[256];
-	sprintf(cmd, "INSERT INTO FINISHED_TBL (PROGRAM, EXECTIME, MAXWORKERS, FINISHTIME) VALUES ('%s', %.2f, %llu, %.2f);", programName, execTime, maxWorkerNum, presentPoint);
+	getSystemTime(pNow);
+	sprintf(cmd, "INSERT INTO FINISHED_TBL (PROGRAM, EXECTIME, MAXWORKERS, FINISHTIME) VALUES ('%s', %.2f, %llu, %s);", programName, execTime, maxWorkerNum, timeInText);
 	if ((rc = sqlite3_exec(db, cmd, NULL, NULL, &errMsg)) != SQLITE_OK) {
 		fprintf(stderr, "SQL error at insert into finished table: %s\n", errMsg);
 		sqlite3_free(errMsg);

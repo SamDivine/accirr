@@ -12,7 +12,7 @@ static uint64_t scheduler_count = 0;
 extern double programStart;
 extern double prevPoint;
 extern double presentPoint;
-extern uint64_t maxWorkerNum;
+extern unsigned long long maxWorkerNum;
 extern char programName[256];
 extern sqlite3 *db;
 extern char* errMsg;
@@ -52,7 +52,7 @@ private:
 			if (presentPoint-prevPoint > 1.0) {
 				prevPoint = presentPoint;
 				double execTime = presentPoint - programStart;
-				uint64_t workerNum = getWorkerNum();
+				unsigned long long workerNum = getWorkerNum();
 				if (workerNum > maxWorkerNum) {
 					maxWorkerNum = workerNum;
 				}
