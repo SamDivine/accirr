@@ -21,11 +21,39 @@ void TaskScheduler::run() {
 	while (thread_wait(NULL) != NULL) {}
 }
 
+#ifdef WEBUI
+extern double programStart;
+extern double prevPoint;
+extern double presentPoint;
+extern uint64_t maxWorkerNum;
+extern char programName[256];
+extern sqlite3 *db;
+extern char* errMsg;
+#endif
+
 Worker* TaskScheduler::thread_wait(void **result) {
 	if (current_thread != master) {
 		std::cerr << "only meant to be called by system worker" << std::endl;
 		exit(-1);
 	}
+#ifdef WEBUI
+	presentPoint = asecd();
+	if (presentPoint-prevPoint > 1.0) {
+		prevPoint = presentPoint;
+		double execTime = presentPoint - programStart;
+		uint64_t workerNum = getWorkerNum();
+		if (workerNum > maxWorkerNum) {
+			maxWorkerNum = workerNum;
+		}
+		char cmd[256];
+		sprintf(cmd, "INSERT INTO TASKTRACK_TBL (ATIME, PROGRAM, EXECTIME WORKERS) VALUES (%.2f, %s, %.2f, %llu);", presentPoint,programName, execTime, workerNum);
+		int rc;
+		if ((rc = sqlite3_exec(db, cmd, NULL, NULL, &errMsg)) != SQLITE_OK) {
+			fprintf(stderr, "SQL error: %s\n", errMsg);
+			sqlite3_free(errMsg);
+		}
+	}
+#endif
 
 	Worker* next = nextCoroutine(false);
 	if (next == NULL) {
@@ -42,3 +70,15 @@ Worker* TaskScheduler::thread_wait(void **result) {
 
 }
 
+#ifdef WEBUI
+double asecd() {
+	timeval pNow;
+	gettimeofday(&pNow, NULL);
+	return pNow.tv_sec+pNow.tv_usec/1000000.0;
+}
+
+double asecd(timeval* pNow) {
+	gettimeofday(pNow, NULL);
+	return pNow->tv_sec+pNow->tv_usec/1000000.0;
+}
+#endif

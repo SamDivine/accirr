@@ -86,6 +86,7 @@ Worker *worker_spawn(Worker *me, Scheduler *sched, thread_func f, void *arg) {
 	Worker *thr = new Worker();
 	thr->sched = sched;
 	sched->assignTid(thr);
+	sched->workerNumInc();
 
 	coro_spawn(me, thr, tramp, STACK_SIZE);
 
@@ -115,6 +116,7 @@ void destroy_thread(Worker *thr) {
 void thread_exit(Worker *me, void *retval) {
 	me->next = (Worker*)retval;
 
+	me->sched->workerNumDec();
 	me->sched->thread_on_exit();
 	exit(EXIT_FAILURE);
 }

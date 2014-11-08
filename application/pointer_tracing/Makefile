@@ -1,3 +1,5 @@
+DEPEND += cpucounters.cpp client_bw.cpp pci.cpp msr.cpp utils.cpp
+
 PREFETCH := -DDATA_PREFETCH
 
 MODE := -DPREFECH_MODE=1

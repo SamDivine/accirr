@@ -93,6 +93,18 @@ public:
 		thr->id = nextId++;
 	}
 
+	void workerNumInc() {
+		num_workers++;
+	}
+
+	void workerNumDec() {
+		num_workers--;
+	}
+
+	uint64_t getWorkerNum() {
+		return num_workers;
+	}
+
 	void createWorkers(uint64_t num);
 	Worker *maybeSpawnCoroutines();
 	void onWorkerStart();
@@ -207,7 +219,8 @@ inline void suspend_wake(Worker *t) {
 }
 
 //for WEBUI mainly
-double nsec(const timeval& start, timeval& end); 
+double asecd();//get absolute time in sec using double format
+double asecd(timeval* pNow);//get absolute time in sec and set pNow
 //
 
 

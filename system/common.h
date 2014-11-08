@@ -7,8 +7,11 @@
 #include <iostream>
 #include <string>
 #include <sys/time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-//#define WEBUI
+#define WEBUI
 
 #ifdef WEBUI
 #include <sqlite3.h>

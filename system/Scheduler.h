@@ -10,6 +10,10 @@ class Scheduler {
 	public:
 		virtual Worker *get_current_thread() = 0;
 		virtual void assignTid(Worker *thr) = 0;
+
+		virtual void workerNumInc() = 0;
+		virtual void workerNumDec() = 0;
+		virtual uint64_t getWorkerNum() = 0;
 		
 		virtual void ready(Worker *thr) = 0;
 		virtual void run() = 0;
