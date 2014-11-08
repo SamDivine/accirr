@@ -66,7 +66,7 @@ int AccirrFinalize() {
 		sqlite3_free(errMsg);
 	}
 	char cmd[256];
-	sprintf(cmd, "INSERT INTO FINISHED_TBL (PROGRAM, EXECTIME, MACWORKERS, FINISHTIME) VALUES (%s, %.2f, %llu, %.2f);", programName, execTime, maxWorkerNum, presentPoint);
+	sprintf(cmd, "INSERT INTO FINISHED_TBL (PROGRAM, EXECTIME, MAXWORKERS, FINISHTIME) VALUES (%s, %.2f, %llu, %.2f);", programName, execTime, maxWorkerNum, presentPoint);
 	if ((rc = sqlite3_exec(db, cmd, NULL, NULL, &errMsg)) != SQLITE_OK) {
 		fprintf(stderr, "SQL error: %s\n", errMsg);
 		sqlite3_free(errMsg);

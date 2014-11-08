@@ -1,10 +1,63 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="">
+	<meta name="author" content="">
+    <title><%= title %> - Accirr</title>
+    <link rel='stylesheet' href='/stylesheets/bootstrap.css' />
+	<link rel='stylesheet' href='/stylesheets/bootstrap-theme.css' />
+	<style type="text/css">
+		body {
+		  padding-top: 70px;
+		  padding-bottom: 30px;
+		}
+
+		.theme-dropdown .dropdown-menu {
+		  position: static;
+		  display: block;
+		  margin-bottom: 20px;
+		}
+
+		.theme-showcase > p > .btn {
+		  margin: 5px 0;
+		}
+
+		.theme-showcase .navbar .container {
+		  width: auto;
+		}
+	</style>
   </head>
   <body>
-    <%- body %>
+	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="/">Accirr</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li class="active"><a href="/">Home</a></li>
+					<li><a href="/running">Running</a></li>
+					<li><a href="/finished">Finished</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	<div class="container theme-showcase" role="main">
+		<%- body %>
+		<hr />
+		<footer>
+			<p>Tsinghua University East Main Building Lab8411</p>
+		</footer>
+	</div>
   </body>
+  <script src="/javascripts/jquery.js"></script>
+  <script src="/javascripts/bootstrap.js"></script>
 </html>
