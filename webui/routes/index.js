@@ -19,7 +19,7 @@ index = function(req, res){
 };
 
 running = function(req, res) {
-	db.all("SELECT * FROM RUNNING_TBL ORDER BY STARTTIME", function(err, rows) {
+	db.all("SELECT * FROM RUNNING_TBL ORDER BY STARTTIME ASC", function(err, rows) {
 		if (!rows) {
 			console.log("empty running result");
 			res.render('running', { 
@@ -37,7 +37,7 @@ running = function(req, res) {
 
 tasktrack = function(req, res) {
 	mTask = req.params.task;
-	var cmd = "SELECT * FROM TASKTRACK_TBL WHERE PROGRAM = '" + mTask + "' ORDER BY ATIME";
+	var cmd = "SELECT * FROM TASKTRACK_TBL WHERE PROGRAM = '" + mTask + "' ORDER BY ATIME ASC";
 	db.all(cmd, function(err, rows) {
 		if (!rows) {
 			console.log("task " + mTask + " not found");
@@ -63,7 +63,7 @@ tasktrack = function(req, res) {
 };
 
 finished = function (req, res) {
-	db.all("SELECt * FROM FINISHED_TBL ORDER BY FINISHTIME", function(err, rows) {
+	db.all("SELECt * FROM FINISHED_TBL ORDER BY FINISHTIME ASC", function(err, rows) {
 		if (!rows) {
 			console.log("empty finished result");
 			res.render('finished', {
