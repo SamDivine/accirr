@@ -12,7 +12,7 @@ char programName[256];
 sqlite3 *db;
 char* errMsg;
 
-char dbFile[] = "home/samdivine/programming/accirr/webui/accirr.db";
+char dbFile[] = "/home/samdivine/programming/accirr/webui/accirr.db";
 #endif
 
 void AccirrInit(int *argc_p, char **argv_p[]) {
@@ -20,9 +20,10 @@ void AccirrInit(int *argc_p, char **argv_p[]) {
 #ifdef WEBUI
 	programStart = asecd();
 	prevPoint = programStart;
+	unsigned long long startInSec = programStart * 100;
 	maxWorkerNum = 0;
 	errMsg = NULL;
-	sprintf(programName, "%s_%.2f", strrchr((*argv_p)[0], '/')+1, programStart);
+	sprintf(programName, "%s_%llu", strrchr((*argv_p)[0], '/')+1, startInSec);
 	for (int i = 1; i < *argc_p; i++) {
 		sprintf(programName, "%s_%s", programName, (*argv_p)[i]);
 	}
@@ -33,17 +34,17 @@ void AccirrInit(int *argc_p, char **argv_p[]) {
 		exit(-1);
 	}
 	if ((rc = sqlite3_exec(db, "CREATE TABLE RUNNING_TBL (PROGRAM TEXT PRIMARY KEY, STARTTIME REAL);", NULL, NULL, &errMsg)) != SQLITE_OK) {
-		fprintf(stderr, "SQL error: %s\n", errMsg);
+		fprintf(stderr, "SQL error at create running table: %s\n", errMsg);
 		sqlite3_free(errMsg);
 	}
 	char cmd[256];
-	sprintf(cmd, "INSERT INTO RUNNING_TBL (PROGRAM, STARTTIME) VALUES (%s, %.2f);", programName, programStart);
+	sprintf(cmd, "INSERT INTO RUNNING_TBL (PROGRAM, STARTTIME) VALUES ('%s', %.2f);", programName, programStart);
 	if ((rc = sqlite3_exec(db, cmd, NULL, NULL, &errMsg)) != SQLITE_OK) {
-		fprintf(stderr, "SQL error: %s\n", errMsg);
+		fprintf(stderr, "SQL error at insert into running table: %s\n", errMsg);
 		sqlite3_free(errMsg);
 	}
 	if ((rc = sqlite3_exec(db, "CREATE TABLE TASKTRACK_TBL (ATIME REAL PRIMARY KEY, PROGRAM TEXT, EXECTIME REAL, WORKERS INTEGER);", NULL, NULL, &errMsg)) != SQLITE_OK) {
-		fprintf(stderr, "SQL error: %s\n", errMsg);
+		fprintf(stderr, "SQL error at create tasktrack table: %s\n", errMsg);
 		sqlite3_free(errMsg);
 	}
 #endif
@@ -62,18 +63,18 @@ int AccirrFinalize() {
 	double execTime = presentPoint-programStart;
 	int rc;
 	if ((rc = sqlite3_exec(db, "CREATE TABLE FINISHED_TBL (PROGRAM TEXT PRIMARY KEY, EXECTIME REAL, MAXWORKERS INTEGER, FINISHTIME REAL);", NULL, NULL, &errMsg)) != SQLITE_OK) {
-		fprintf(stderr, "SQL error: %s\n", errMsg);
+		fprintf(stderr, "SQL error at create finished table: %s\n", errMsg);
 		sqlite3_free(errMsg);
 	}
 	char cmd[256];
-	sprintf(cmd, "INSERT INTO FINISHED_TBL (PROGRAM, EXECTIME, MAXWORKERS, FINISHTIME) VALUES (%s, %.2f, %llu, %.2f);", programName, execTime, maxWorkerNum, presentPoint);
+	sprintf(cmd, "INSERT INTO FINISHED_TBL (PROGRAM, EXECTIME, MAXWORKERS, FINISHTIME) VALUES ('%s', %.2f, %llu, %.2f);", programName, execTime, maxWorkerNum, presentPoint);
 	if ((rc = sqlite3_exec(db, cmd, NULL, NULL, &errMsg)) != SQLITE_OK) {
-		fprintf(stderr, "SQL error: %s\n", errMsg);
+		fprintf(stderr, "SQL error at insert into finished table: %s\n", errMsg);
 		sqlite3_free(errMsg);
 	}
-	sprintf(cmd, "DELETE * FROM RUNNING_TBL WHERE PROGRAM = %s;", programName);
+	sprintf(cmd, "DELETE FROM RUNNING_TBL WHERE PROGRAM = '%s';", programName);
 	if ((rc = sqlite3_exec(db, cmd, NULL, NULL, &errMsg)) != SQLITE_OK) {
-		fprintf(stderr, "SQL error: %s\n", errMsg);
+		fprintf(stderr, "SQL error at delete from running table: %s\n", errMsg);
 		sqlite3_free(errMsg);
 	}
 #endif

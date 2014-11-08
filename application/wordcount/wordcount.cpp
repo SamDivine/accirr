@@ -13,8 +13,8 @@ const int BIG_PRIME = 100000001;
 
 int CORO_NUM;
 
-int64_t INITTEXTSIZE=(1<<24);
-int64_t QUERYWORDS=(1<<23);
+int64_t INITTEXTSIZE=(1<<23);
+int64_t QUERYWORDS=(1<<25);
 
 int64_t foundCount = 0;
 

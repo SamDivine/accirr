@@ -37,7 +37,7 @@ running = function(req, res) {
 
 tasktrack = function(req, res) {
 	mTask = req.params.task;
-	var cmd = "SELECT * FROM TASKTRACK_TBL WHERE PROGRAM = " + mTask + " ORDER BY ATIME";
+	var cmd = "SELECT * FROM TASKTRACK_TBL WHERE PROGRAM = '" + mTask + "' ORDER BY ATIME";
 	db.all(cmd, function(err, rows) {
 		if (!rows) {
 			console.log("task " + mTask + " not found");

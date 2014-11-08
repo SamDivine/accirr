@@ -27,8 +27,8 @@
 		calculable : true,
 		xAxis : [
 			{
-				type : 'value',
-				data : <%= xaxis %>
+				type : 'category',
+				data : [<%= xaxis %>]
 			}
 		],
 		yAxis : [
@@ -41,7 +41,7 @@
 			{
 				name : 'exectime',
 				type : 'line',
-				data : <%= yaxis %>
+				data : [<%= yaxis %>]
 			}
 		]
 	});
