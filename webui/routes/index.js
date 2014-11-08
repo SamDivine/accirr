@@ -10,8 +10,7 @@ var db = new sqlite3.Database('/home/samdivine/programming/accirr/webui/accirr.d
 module.exports = function(app) {
 	app.get('/', index);
 	app.get('/running', running);
-	app.get('/tt/:task', function(req, res){
-	});
+	app.get('/tt/:task', tasktrack);
 	app.get('/finished', finished);
 }
 
@@ -20,15 +19,62 @@ index = function(req, res){
 };
 
 running = function(req, res) {
-  var tmp = [{"PROGRAM": "hahaha", "STARTTIME": 0},
-			 {"PROGRAM": "hehe", "STARTTIME": 1}];
-  res.render('running', { title: 'Running',
-						  tasklist: tmp});
+	db.all("SELECT * FROM RUNNING_TBL ORDER BY STARTTIME", function(err, rows) {
+		if (!rows) {
+			console.log("empty running result");
+			res.render('running', { 
+				title: 'Running',
+				tasklist: []
+			});
+		} else {
+			res.render('running', { 
+				title: 'Running',
+				tasklist: rows
+			});
+		}
+	});
+};
+
+tasktrack = function(req, res) {
+	mTask = req.params.task;
+	var cmd = "SELECT * FROM TASKTRACK_TBL WHERE PROGRAM = " + mTask + " ORDER BY ATIME";
+	db.all(cmd, function(err, rows) {
+		if (!rows) {
+			console.log("task " + mTask + " not found");
+			res.render('tasktrack', {
+				title: mTask,
+				xaxis: [],
+				yaxis: []
+			});
+		} else {
+			exectime = new Array();
+			workers = new Array();
+			for (i = 0; i < rows.length; i++) {
+				exectime[i] = rows[i].EXECTIME;
+				workers[i] = rows[i].WORKERS;
+			}
+			res.render('tasktrack', {
+				title: mTask,
+				xaxis: exectime,
+				yaxis: workers
+			});
+		}
+	});
 };
 
 finished = function (req, res) {
-  var tmp = [{"PROGRAM": "ha", "EXECTIME": 10, "MAXWORKERS": 3, "FINISHTIME": 40},
-			 {"PROGRAM": "he", "EXECTIME": 11, "MAXWORKERS": 4, "FINISHTIME": 50}];
-  res.render('finished', { title: 'Finished',
-						   tasklist: tmp});
+	db.all("SELECt * FROM FINISHED_TBL ORDER BY FINISHTIME", function(err, rows) {
+		if (!rows) {
+			console.log("empty finished result");
+			res.render('finished', {
+				title: 'Finished',
+				tasklist: []
+			});
+		} else {
+			res.render('finished', {
+				title: 'Finished',
+				tasklist: rows
+			});
+		}
+	});
 };

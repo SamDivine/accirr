@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<div class="page-header">
+	<h1><%= title %></h1>
+</div>
+
+<div id="main" style="height:600px;border:1px solid #ccc;padding:10px;"></div>
+<script src="/javascripts/echarts-plain.js"></script>
+<script type="text/javascript">
+	var myChart = echarts.init(document.getElementById('main'));
+	myChart.setOption({
+		tooltip : {
+			trigger: 'axis'
+		},
+		legend : {
+			data: ['exectime']
+		},
+		toolbox : {
+			show: true,
+			feature : {
+				mark : {show: true},
+				dataView : {show: true, readOnly: false},
+				magicType : {show: true, type: ['line', 'bar']},
+				restore : {show: true},
+				saveAsImage : {show: true}
+			}
+		},
+		calculable : true,
+		xAxis : [
+			{
+				type : 'value',
+				data : <%= xaxis %>
+			}
+		],
+		yAxis : [
+			{
+				type : 'value',
+				splitArea : {show: true}
+			}
+		],
+		series : [
+			{
+				name : 'exectime',
+				type : 'line',
+				data : <%= yaxis %>
+			}
+		]
+	});
+</script>
