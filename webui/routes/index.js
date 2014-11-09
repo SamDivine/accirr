@@ -4,7 +4,7 @@
  */
 
 var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('/home/samdivine/programming/accirr/webui/accirr.db');
+var db = new sqlite3.Database('/home/localhost/accirr/webui/accirr.db');
 
 
 module.exports = function(app) {

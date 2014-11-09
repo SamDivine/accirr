@@ -12,7 +12,7 @@ char programName[256];
 sqlite3 *db;
 char* errMsg;
 
-char dbFile[] = "/home/samdivine/programming/accirr/webui/accirr.db";
+char dbFile[] = "/home/localhost/accirr/webui/accirr.db";
 char timeInText[20];
 void getSystemTime(timeval pNow) {
 	int year = 1970, month = 1, day = 1, hour = 0, minute = 0, second = 0;

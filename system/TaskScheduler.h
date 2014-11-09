@@ -47,7 +47,7 @@ private:
 			exit(-1);
 		}
 #ifdef WEBUI
-		if (scheduler_context_switches % 1000 == 0) {
+		if (scheduler_context_switches % 1000000 == 0) {
 			presentPoint = asecd();
 			if (presentPoint-prevPoint > 1.0) {
 				prevPoint = presentPoint;
