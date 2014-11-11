@@ -11,14 +11,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define WEBUI
+//#define WEBUI
 
 #ifdef WEBUI
 #include <sqlite3.h>
 #endif
 
 #ifndef STACK_SIZE
-#define STACK_SIZE (1<<15)
+#define STACK_SIZE (1<<14)
 #endif
 
 #ifndef BLOCK_SIZE
