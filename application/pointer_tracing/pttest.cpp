@@ -118,6 +118,7 @@ void tracingTask(Worker *me, void *arg) {
 				}
 				times++;
 				localList = localList->next;
+				finishedTasks++;
 			} 
 			//std::cerr << "list " << j << " end" << std::endl;
 		}

@@ -12,7 +12,7 @@
 			trigger: 'axis'
 		},
 		legend : {
-			data: ['workers']
+			data: ['workers', 'tasks', 'switches']
 		},
 		toolbox : {
 			show: true,
@@ -28,20 +28,38 @@
 		xAxis : [
 			{
 				type : 'category',
-				data : [<%= xaxis %>]
+				data : [<%= exectime %>]
 			}
 		],
 		yAxis : [
 			{
 				type : 'value',
+				name : 'workers',
+				splitArea : {show: true}
+			},
+			{
+				type : 'value',
+				name : 'taskRelated',
 				splitArea : {show: true}
 			}
 		],
 		series : [
 			{
 				name : 'workers',
+				type : 'bar',
+				data : [<%= workers %>]
+			},
+			{
+				name : 'tasks',
 				type : 'line',
-				data : [<%= yaxis %>]
+				yAxisIndex : 1,
+				data : [<%= tasks %>]
+			},
+			{
+				name : 'switches',
+				type : 'line',
+				yAxisIndex : 1,
+				data : [<%= switches %>]
 			}
 		]
 	});

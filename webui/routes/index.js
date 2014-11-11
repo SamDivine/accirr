@@ -43,20 +43,28 @@ tasktrack = function(req, res) {
 			console.log("task " + mTask + " not found");
 			res.render('tasktrack', {
 				title: mTask,
-				xaxis: [],
-				yaxis: []
+				exectime: [],
+				workers: [],
+				tasks: [],
+				switches: []
 			});
 		} else {
-			exectime = new Array();
-			workers = new Array();
+			mExectime = new Array();
+			mWorkers = new Array();
+			mTasks = new Array();
+			mSwitches = new Array();
 			for (i = 0; i < rows.length; i++) {
-				exectime[i] = rows[i].EXECTIME;
-				workers[i] = rows[i].WORKERS;
+				mExectime[i] = rows[i].EXECTIME;
+				mWorkers[i] = rows[i].WORKERS;
+				mTasks[i] = rows[i].FINISHEDTASKS;
+				mSwitches[i] = rows[i].CONTEXTSWITCHES;
 			}
 			res.render('tasktrack', {
 				title: mTask,
-				xaxis: exectime,
-				yaxis: workers
+				exectime: mExectime,
+				workers: mWorkers,
+				tasks: mTasks,
+				switches: mSwitches
 			});
 		}
 	});

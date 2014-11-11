@@ -8,6 +8,8 @@ double programStart;
 double prevPoint;
 double presentPoint;
 unsigned long long maxWorkerNum;
+unsigned long long contextSwitches;
+unsigned long long finishedTasks;
 char programName[256];
 sqlite3 *db;
 char* errMsg;
@@ -54,6 +56,8 @@ void AccirrInit(int *argc_p, char **argv_p[]) {
 	programStart = asecd(&pNow);
 	prevPoint = programStart;
 	maxWorkerNum = 0;
+	contextSwitches = 0;
+	finishedTasks = 0;
 	errMsg = NULL;
 	getSystemTime(pNow);
 	sprintf(programName, "%s_%s", strrchr((*argv_p)[0], '/')+1, timeInText);
@@ -76,8 +80,13 @@ void AccirrInit(int *argc_p, char **argv_p[]) {
 		fprintf(stderr, "SQL error at insert into running table: %s\n", errMsg);
 		sqlite3_free(errMsg);
 	}
-	if ((rc = sqlite3_exec(db, "CREATE TABLE TASKTRACK_TBL (ATIME REAL PRIMARY KEY, PROGRAM TEXT, EXECTIME REAL, WORKERS INTEGER);", NULL, NULL, &errMsg)) != SQLITE_OK) {
+	if ((rc = sqlite3_exec(db, "CREATE TABLE TASKTRACK_TBL (ATIME REAL PRIMARY KEY, PROGRAM TEXT, EXECTIME REAL, WORKERS INTEGER, FINISHEDTASKS INTEGER, CONTEXTSWITCHES INTEGER);", NULL, NULL, &errMsg)) != SQLITE_OK) {
 		fprintf(stderr, "SQL error at create tasktrack table: %s\n", errMsg);
+		sqlite3_free(errMsg);
+	}
+	sprintf(cmd, "INSERT INTO TASKTRACK_TBL (ATIME, PROGRAM, EXECTIME, WORKERS, FINISHEDTASKS, CONTEXTSWITCHES) VALUES (%.2f, '%s', 0.0, %llu, %llu, 0);", programStart, programName, maxWorkerNum, finishedTasks);
+	if ((rc = sqlite3_exec(db, cmd, NULL, NULL, &errMsg)) != SQLITE_OK) {
+		fprintf(stderr, "SQL error at first insert into tasktrack table: %s\n", errMsg);
 		sqlite3_free(errMsg);
 	}
 #endif
@@ -96,13 +105,13 @@ int AccirrFinalize() {
 	presentPoint = asecd(&pNow);
 	double execTime = presentPoint-programStart;
 	int rc;
-	if ((rc = sqlite3_exec(db, "CREATE TABLE FINISHED_TBL (PROGRAM TEXT PRIMARY KEY, EXECTIME REAL, MAXWORKERS INTEGER, FINISHTIME TEXT);", NULL, NULL, &errMsg)) != SQLITE_OK) {
+	if ((rc = sqlite3_exec(db, "CREATE TABLE FINISHED_TBL (PROGRAM TEXT PRIMARY KEY, EXECTIME REAL, MAXWORKERS INTEGER, FINISHTIME TEXT, FINISHEDTASKS IETEGER);", NULL, NULL, &errMsg)) != SQLITE_OK) {
 		fprintf(stderr, "SQL error at create finished table: %s\n", errMsg);
 		sqlite3_free(errMsg);
 	}
 	char cmd[256];
 	getSystemTime(pNow);
-	sprintf(cmd, "INSERT INTO FINISHED_TBL (PROGRAM, EXECTIME, MAXWORKERS, FINISHTIME) VALUES ('%s', %.2f, %llu, %s);", programName, execTime, maxWorkerNum, timeInText);
+	sprintf(cmd, "INSERT INTO FINISHED_TBL (PROGRAM, EXECTIME, MAXWORKERS, FINISHTIME, FINISHEDTASKS) VALUES ('%s', %.2f, %llu, '%s', %llu);", programName, execTime, maxWorkerNum, timeInText, finishedTasks);
 	if ((rc = sqlite3_exec(db, cmd, NULL, NULL, &errMsg)) != SQLITE_OK) {
 		fprintf(stderr, "SQL error at insert into finished table: %s\n", errMsg);
 		sqlite3_free(errMsg);

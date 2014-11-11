@@ -119,6 +119,7 @@ void queryTask(Worker *me, void *arg) {
 			}
 			mNode = mNode->next;
 		}
+		finishedTasks++;
 	}
 }
 
