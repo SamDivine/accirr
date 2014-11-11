@@ -18,7 +18,7 @@
 #endif
 
 #ifndef STACK_SIZE
-#define STACK_SIZE (1<<14)
+#define STACK_SIZE (1<<15)
 #endif
 
 #ifndef BLOCK_SIZE
