@@ -4,7 +4,8 @@
  */
 
 var express = require('express')
-  , routes = require('./routes');
+  , routes = require('./routes')
+  , compare = require('./routes/compare');
 
 var app = module.exports = express.createServer();
 
@@ -17,6 +18,7 @@ app.configure(function(){
   app.use(express.methodOverride());
   //app.use(app.router);
   app.use(express.router(routes));
+  app.use(express.router(compare));
   app.use(express.static(__dirname + '/public'));
 });
 

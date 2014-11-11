@@ -117,6 +117,9 @@ void spreadTask(Worker *me, void *arg) {
 				parent[v] = mVertex;
 				nextQ[nQLen++] = v;
 			}
+#ifdef WEBUI
+			finishedTasks++;
+#endif
 		}
 	}
 }
@@ -176,10 +179,10 @@ int main(int argc, char** argv)
 	MAX_COROS = atoi(argv[3]);
 	gettimeofday(&start, NULL);
 	getGraph(argv[1]);
-	AccirrInit(&argc, &argv);
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec)/1000000.0;
 	cerr << "get Graph takes " << duration << " s" << endl;
+	AccirrInit(&argc, &argv);
 	gettimeofday(&start, NULL);
 	bfs();
 	gettimeofday(&end, NULL);

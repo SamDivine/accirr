@@ -12,6 +12,10 @@ module.exports = function(app) {
 	app.get('/running', running);
 	app.get('/tt/:task', tasktrack);
 	app.get('/finished', finished);
+	app.get('/compare', compare);
+	app.get('/compare/pointer_chasing', pointer_chasing);
+	app.get('/compare/BFS', BFS);
+	app.get('/compare/Hash', Hash);
 }
 
 index = function(req, res){

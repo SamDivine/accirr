@@ -13,8 +13,8 @@ const int BIG_PRIME = 100000001;
 
 int CORO_NUM;
 
-int64_t INITTEXTSIZE=(1<<23);
-int64_t QUERYWORDS=(1<<25);
+int64_t INITTEXTSIZE=(1<<25);
+int64_t QUERYWORDS=(1<<26);
 
 int64_t foundCount = 0;
 
@@ -119,7 +119,9 @@ void queryTask(Worker *me, void *arg) {
 			}
 			mNode = mNode->next;
 		}
+#ifdef WEBUI
 		finishedTasks++;
+#endif
 	}
 }
 
@@ -154,13 +156,13 @@ int main(int argc, char** argv)
 	}
 
 	CORO_NUM = atoi(argv[1]);
-	AccirrInit(&argc, &argv);
 
 	gettimeofday(&start, NULL);
 	getWords();
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec)/1000000.0;
 	cerr << "build wordlist takes " << duration << " s" << endl;
+	AccirrInit(&argc, &argv);
 	for (intptr_t i = 0; i < CORO_NUM; i++) {
 		createTask(queryTask, (void*)i);
 	}

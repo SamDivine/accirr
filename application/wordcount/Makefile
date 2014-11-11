@@ -1,6 +1,6 @@
 include ../Makefile
 
-CXXFLAGS += -DDATA_PREFETCH
+CXXFLAGS += -DDATA_PREFETCH -DWEBUI
 
 TARGET=testprime wordcount old_wc mpwordcount
 
