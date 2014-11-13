@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<div class="page-header">
+	<h1><%= title %></h1>
+</div>
+	<div class="row">
+		<div id="graph1" class="col-md-6">
+			<div id="pt1" style="height:350px;border:1px solid #ccc;padding:10px;"></div>
+		</div>
+		<div id="graph2" class="col-md-6">
+			<div id="pt2" style="height:350px;border:1px solid #ccc;padding:10px;"></div>
+		</div>
+	</div>
+	<div class="row">
+		<div id="graph3" class="col-md-6">
+			<div id="pt3" style="height:350px;border:1px solid #ccc;padding:10px;"></div>
+		</div>
+		<div id="graph4" class="col-md-6">
+			<div id="pt4" style="height:350px;border:1px solid #ccc;padding:10px;"></div>
+		</div>
+	</div>
+<script src="/javascripts/echarts-plain.js"></script>
+<script type="text/javascript">
+	var myChart = echarts.init(document.getElementById('pt1'));
+	myChart.setOption({
+		title : {
+			text: 'Case 1'
+		},
+		tooltip : {
+			trigger: 'axis'
+		},
+		legend : {
+			data: ['workers', 'tasks', 'switches']
+		},
+		toolbox : {
+			show: true,
+			feature : {
+				dataView : {show: true, readOnly: false},
+			}
+		},
+		calculable : true,
+		xAxis : [
+			{
+				type : 'category',
+				data : [0,1.59,2.73,3.78,4.99,6.03,7.27,8.46,9.51,10.53,11.8,12.96,14.06,15.26,16.34,17.53,18.55]
+			}
+		],
+		yAxis : [
+			{
+				type : 'value',
+				name : 'workers',
+				splitArea : {show: true}
+			},
+			{
+				type : 'value',
+				name : 'taskRelated',
+				splitArea : {show: true}
+			}
+		],
+		series : [
+			{
+				name : 'workers',
+				type : 'bar',
+				data : [0,131072,131072,131072,131072,131072,131072,131072,131072,131072,131072,131072,131072,131072,131072,131072,131072]
+			},
+			{
+				name : 'tasks',
+				type : 'line',
+				yAxisIndex : 1,
+				data : [0,868928,3868928,7868928,12868928,16868928,21868928,26868928,30868928,34868928,39868928,44868928,48868928,53868928,57868928,62868928,66868928]
+			},
+			{
+				name : 'switches',
+				type : 'line',
+				yAxisIndex : 1,
+				data : [0,1000000,4000000,8000000,13000000,17000000,22000000,27000000,31000000,35000000,40000000,45000000,49000000,54000000,58000000,63000000,67000000]
+			}
+		]
+	});
+</script>
+<script type="text/javascript">
+	var myChart = echarts.init(document.getElementById('pt2'));
+	myChart.setOption({
+		title : {
+			text: 'Case 2'
+		},
+		tooltip : {
+			trigger: 'axis'
+		},
+		legend : {
+			data: ['workers', 'tasks', 'switches']
+		},
+		toolbox : {
+			show: true,
+			feature : {
+				dataView : {show: true, readOnly: false},
+			}
+		},
+		calculable : true,
+		xAxis : [
+			{
+				type : 'category',
+				data : [0,2.49,3.76,4.98,6.08,7.25,8.39,9.49,10.62,11.73,12.9,13.99,15.14,16.23,17.23,18.26,19.37]
+			}
+		],
+		yAxis : [
+			{
+				type : 'value',
+				name : 'workers',
+				splitArea : {show: true}
+			},
+			{
+				type : 'value',
+				name : 'taskRelated',
+				splitArea : {show: true}
+			}
+		],
+		series : [
+			{
+				name : 'workers',
+				type : 'bar',
+				data : [0,262144,262144,262144,262144,262144,262144,262144,262144,262144,262144,262144,262144,262144,262144,262144,262144]
+			},
+			{
+				name : 'tasks',
+				type : 'line',
+				yAxisIndex : 1,
+				data : [0,737856,4737856,8737856,12737856,17737856,22737856,26737856,30737856,35737856,40737856,44737856,48737856,53737856,57737856,61737856,65737856]
+			},
+			{
+				name : 'switches',
+				type : 'line',
+				yAxisIndex : 1,
+				data : [0,1000000,5000000,9000000,13000000,18000000,23000000,27000000,31000000,36000000,41000000,45000000,49000000,54000000,58000000,62000000,66000000]
+			}
+		]
+	});
+</script>
+<script type="text/javascript">
+	var myChart = echarts.init(document.getElementById('pt3'));
+	myChart.setOption({
+		title : {
+			text: 'Case 3'
+		},
+		tooltip : {
+			trigger: 'axis'
+		},
+		legend : {
+			data: ['workers', 'tasks', 'switches']
+		},
+		toolbox : {
+			show: true,
+			feature : {
+				dataView : {show: true, readOnly: false},
+			}
+		},
+		calculable : true,
+		xAxis : [
+			{
+				type : 'category',
+				data : [0,3.44,4.58,5.75,6.96,8.17,9.3,10.33,11.4,12.57,13.69,14.76,15.87,16.89,18.03,19.06,20.09]
+			}
+		],
+		yAxis : [
+			{
+				type : 'value',
+				name : 'workers',
+				splitArea : {show: true}
+			},
+			{
+				type : 'value',
+				name : 'taskRelated',
+				splitArea : {show: true}
+			}
+		],
+		series : [
+			{
+				name : 'workers',
+				type : 'bar',
+				data : [0,393216,393216,393216,393216,393216,393216,393216,393216,393216,393216,393216,393216,262144,262144,262144,262144]
+			},
+			{
+				name : 'tasks',
+				type : 'line',
+				yAxisIndex : 1,
+				data : [0,606784,4606784,8606784,12606784,16606784,20606784,24606784,29606784,34606784,38606784,42606784,46606784,50737856,55737856,59737856,63737856]
+			},
+			{
+				name : 'switches',
+				type : 'line',
+				yAxisIndex : 1,
+				data : [0,1000000,5000000,9000000,13000000,17000000,21000000,25000000,30000000,35000000,39000000,43000000,47000000,51000000,56000000,60000000,64000000]
+			}
+		]
+	});
+</script>
+<script type="text/javascript">
+	var myChart = echarts.init(document.getElementById('pt4'));
+	myChart.setOption({
+		title : {
+			text: 'Case 4'
+		},
+		tooltip : {
+			trigger: 'axis'
+		},
+		legend : {
+			data: ['workers', 'tasks', 'switches']
+		},
+		toolbox : {
+			show: true,
+			feature : {
+				dataView : {show: true, readOnly: false},
+			}
+		},
+		calculable : true,
+		xAxis : [
+			{
+				type : 'category',
+				data : [0,4.31,5.48,6.58,7.71,8.87,10.06,11.24,12.36,13.56,14.63,15.81,16.81,17.84,18.87,19.93,20.97]
+			}
+		],
+		yAxis : [
+			{
+				type : 'value',
+				name : 'workers',
+				splitArea : {show: true}
+			},
+			{
+				type : 'value',
+				name : 'taskRelated',
+				splitArea : {show: true}
+			}
+		],
+		series : [
+			{
+				name : 'workers',
+				type : 'bar',
+				data : [0,524288,524288,524288,524288,524288,524288,524288,524288,524288,524288,524288,524288,524288,524288,524288,524288]
+			},
+			{
+				name : 'tasks',
+				type : 'line',
+				yAxisIndex : 1,
+				data : [0,475712,4475712,8475712,12475712,16475712,20475712,24475712,28475712,33475712,38475712,43475712,47475712,51475712,55475712,59475712,63475712]
+			},
+			{
+				name : 'switches',
+				type : 'line',
+				yAxisIndex : 1,
+				data : [0,1000000,5000000,9000000,13000000,17000000,21000000,25000000,29000000,34000000,39000000,44000000,48000000,52000000,56000000,60000000,64000000]
+			}
+		]
+	});
+</script>
