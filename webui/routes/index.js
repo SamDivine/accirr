@@ -4,7 +4,7 @@
  */
 
 var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('/home/localhost/accirr/webui/accirr.db');
+var db = new sqlite3.Database('/home/samdivine/programming/accirr/webui/accirr.db');
 
 
 module.exports = function(app) {
@@ -18,21 +18,43 @@ module.exports = function(app) {
 	app.get('/compare/Hash', Hash);
 }
 
+function translate(mStr) {
+	var rst = mStr;
+	var prefix = mStr.substr(0, mStr.indexOf('_'));
+	switch(prefix) {
+	case 'pttest':
+		rst = rst.replace(prefix, '指针跟踪');
+		break;
+	case 'bfs':
+		rst = rst.replace(prefix, '宽度优先搜索');
+		break;
+	case 'wordcount':
+		rst = rst.replace(prefix, '基于Hash的查找');
+		break;
+	default:
+		rst = rst.replace(prefix, '测试程序');
+		break;
+	}
+	return rst;
+};
+
 index = function(req, res){
   res.render('index', { title: 'Accirr'});
 };
 
 running = function(req, res) {
 	db.all("SELECT * FROM RUNNING_TBL ORDER BY STARTTIME ASC", function(err, rows) {
+		req.listtype = 'running';
 		if (!rows) {
 			console.log("empty running result");
-			res.render('running', { 
-				title: 'Running',
+			res.render('list', { 
 				tasklist: []
 			});
 		} else {
-			res.render('running', { 
-				title: 'Running',
+			for (i = 0; i < rows.length; i++) {
+				rows[i].TRANSNAME = translate(rows[i].PROGRAM);
+			}
+			res.render('list', { 
 				tasklist: rows
 			});
 		}
@@ -43,10 +65,11 @@ tasktrack = function(req, res) {
 	mTask = req.params.task;
 	var cmd = "SELECT * FROM TASKTRACK_TBL WHERE PROGRAM = '" + mTask + "' ORDER BY ATIME ASC";
 	db.all(cmd, function(err, rows) {
+		var mTitle = translate(mTask);
 		if (!rows) {
 			console.log("task " + mTask + " not found");
 			res.render('tasktrack', {
-				title: mTask,
+				title: mTitle,
 				exectime: [],
 				workers: [],
 				tasks: [],
@@ -64,7 +87,7 @@ tasktrack = function(req, res) {
 				mSwitches[i] = rows[i].CONTEXTSWITCHES;
 			}
 			res.render('tasktrack', {
-				title: mTask,
+				title: mTitle,
 				exectime: mExectime,
 				workers: mWorkers,
 				tasks: mTasks,
@@ -76,15 +99,17 @@ tasktrack = function(req, res) {
 
 finished = function (req, res) {
 	db.all("SELECt * FROM FINISHED_TBL ORDER BY FINISHTIME ASC", function(err, rows) {
+		req.listtype = 'finished';
 		if (!rows) {
 			console.log("empty finished result");
-			res.render('finished', {
-				title: 'Finished',
+			res.render('list', {
 				tasklist: []
 			});
 		} else {
-			res.render('finished', {
-				title: 'Finished',
+			for (i = 0; i < rows.length; i++) {
+				rows[i].TRANSNAME = translate(rows[i].PROGRAM);
+			}
+			res.render('list', {
 				tasklist: rows
 			});
 		}

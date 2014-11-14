@@ -12,7 +12,7 @@
 			trigger: 'axis'
 		},
 		legend : {
-			data: ['workers', 'tasks', 'switches']
+			data: ['协程数', '子任务数', '切换数']
 		},
 		toolbox : {
 			show: true,
@@ -34,29 +34,29 @@
 		yAxis : [
 			{
 				type : 'value',
-				name : 'workers',
+				name : '协程数',
 				splitArea : {show: true}
 			},
 			{
 				type : 'value',
-				name : 'taskRelated',
+				name : '子任务相关',
 				splitArea : {show: true}
 			}
 		],
 		series : [
 			{
-				name : 'workers',
+				name : '协程数',
 				type : 'bar',
 				data : [<%= workers %>]
 			},
 			{
-				name : 'tasks',
+				name : '子任务数',
 				type : 'line',
 				yAxisIndex : 1,
 				data : [<%= tasks %>]
 			},
 			{
-				name : 'switches',
+				name : '切换数',
 				type : 'line',
 				yAxisIndex : 1,
 				data : [<%= switches %>]

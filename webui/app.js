@@ -9,6 +9,12 @@ var express = require('express')
 
 var app = module.exports = express.createServer();
 
+app.dynamicHelpers({
+  listtype: function(req, res) {
+    return req.listtype;
+  },
+});
+
 // Configuration
 
 app.configure(function(){

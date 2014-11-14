@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<div class="page-header">
+	<% if (listtype === 'running') { %>
+	<h1>正在运行的任务</h1>
+	<% } else if (listtype === 'finished') { %>
+	<h1>运行完成的任务</h1>
+	<% } else { %>
+	<h1>未知任务</h1>
+	<% } %>
+</div>
+<div class="col-lg-12">
+	<table class="table">
+		<thead>
+			<tr>
+				<th>任务名称</th>
+				<% if (listtype === 'running') { %>
+				<th>开始时间</th>
+				<% } else if (listtype === 'finished') { %>
+				<th>运行时间</th>
+				<th>最大协程数</th>
+				<th>结束时间</th>
+				<th>完成子任务数</th>
+				<% } %>
+			</tr>
+		</thead>
+		<tbody>
+			<% if (listtype === 'running') { %>
+			<%- partial('runningtask', tasklist) %>
+			<% } else if (listtype === 'finished') { %>
+			<%- partial('finishedtask', tasklist) %>
+			<% } %>
+		</tbody>
+	</table>
+</div>
+
