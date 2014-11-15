@@ -13,6 +13,17 @@ app.dynamicHelpers({
   listtype: function(req, res) {
     return req.listtype;
   },
+  graphtype: function(req, res) {
+	return req.graphtype;
+  },
+  error: function(req, res) {
+	var err = req.flash('error');
+	if (err.length) {
+	  return err;
+	} else {
+	  return null;
+	}
+  },
 });
 
 // Configuration
@@ -22,6 +33,10 @@ app.configure(function(){
   app.set('view engine', 'ejs');
   app.use(express.bodyParser());
   app.use(express.methodOverride());
+  app.use(express.cookieParser());
+  app.use(express.session({
+    secret: 'only-flash'
+  }));
   //app.use(app.router);
   app.use(express.router(routes));
   app.use(express.router(compare));

@@ -46,6 +46,10 @@ index = function(req, res){
 
 running = function(req, res) {
 	db.all("SELECT * FROM RUNNING_TBL ORDER BY STARTTIME ASC", function(err, rows) {
+		if (err) {
+			req.flash('error', err);
+			return res.redirect('/');
+		}
 		req.listtype = 'running';
 		if (rows.length === 0) {
 			console.log("empty running result");
@@ -65,43 +69,51 @@ running = function(req, res) {
 
 tasktrack = function(req, res) {
 	mTask = req.params.task;
-	var cmd = "SELECT * FROM RUNNING_TBL WHERE PROGRAM = '" + mTask + "'";
-
-	db.all(cmd, function(err, runnings) {
-		if (runnings.length === 0) {
-			req.listtype = 'finished';
-		} else {
-			req.listtype = 'running';
-		}
+	db.serialize(function() {
+		var cmd = "SELECT * FROM RUNNING_TBL WHERE PROGRAM = '" + mTask + "'";
+		db.all(cmd, function(err, rows) {
+			if (err) {
+				req.flash('error', err);
+				return res.redirect('/');
+			}
+			if (rows.length !== 0) {
+				req.graphtype = 'running';
+			} else {
+				req.graphtype = 'notrunning';
+			}
+		});
 		cmd = "SELECT * FROM TASKTRACK_TBL WHERE PROGRAM = '" + mTask + "' ORDER BY ATIME ASC";
 		db.all(cmd, function(err, rows) {
+			if (err) {
+				req.flash('error', err);
+				return res.redirect('/');
+			}
 			var mTitle = translate(mTask);
 			if (rows.length === 0) {
-				console.log("task " + mTask + " not found");
-				res.render('tasktrack', {
-					title: mTitle,
-					exectime: [],
-					workers: [],
-					tasks: [],
-					switches: []
-				});
+				req.flash('error', '没有该任务');
+				return res.redirect('/');
 			} else {	
 				mExectime = new Array();
 				mWorkers = new Array();
 				mTasks = new Array();
 				mSwitches = new Array();
+				var mMaxWorkers = 0;
 				for (i = 0; i < rows.length; i++) {
 					mExectime[i] = rows[i].EXECTIME;
 					mWorkers[i] = rows[i].WORKERS;
 					mTasks[i] = rows[i].FINISHEDTASKS;
 					mSwitches[i] = rows[i].CONTEXTSWITCHES;
+					if (mWorkers[i] > mMaxWorkers) {
+						mMaxWorkers = mWorkers[i];
+					}
 				}
 				res.render('tasktrack', {
 					title: mTitle,
 					exectime: mExectime,
 					workers: mWorkers,
 					tasks: mTasks,
-					switches: mSwitches
+					switches: mSwitches,
+					maxWorkers: mMaxWorkers
 				});
 			}
 		});
@@ -110,6 +122,10 @@ tasktrack = function(req, res) {
 
 finished = function (req, res) {
 	db.all("SELECT * FROM FINISHED_TBL ORDER BY FINISHTIME ASC", function(err, rows) {
+		if (err) {
+			req.flash('error', err);
+			return res.redirect('/');
+		}
 		req.listtype = 'finished';
 		if (rows.length === 0) {
 			console.log("empty finished result");

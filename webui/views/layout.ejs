@@ -58,11 +58,12 @@
 		<div class="alert alert-info" role="alert">
 			<strong>Memory:32GB L1-Cache:32KB L2-Cache:256KB L3-Cache:16MB</strong>
 		</div>
+		<% if (error) { %>
+		<div class="alert alert-danger" role="alert">
+			<strong><%= error %></strong>
+		</div>
+		<% } %>
 		<%- body %>
-		<hr />
-		<footer>
-			<p>清华大学东主楼8411</p>
-		</footer>
 	</div>
   <script src="/javascripts/jquery.js"></script>
   <script src="/javascripts/bootstrap.js"></script>

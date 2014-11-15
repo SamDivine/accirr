@@ -17,7 +17,7 @@
 				<th>开始时间</th>
 				<% } else if (listtype === 'finished') { %>
 				<th>运行时间</th>
-				<th>最大协程数</th>
+				<th>最大轻量级线程数</th>
 				<th>结束时间</th>
 				<th>完成子任务数</th>
 				<% } %>
@@ -32,4 +32,13 @@
 		</tbody>
 	</table>
 </div>
+
+<% if (listtype === 'running') { %>
+<script type="text/javascript">
+	function mRefresh() {
+		window.location.reload();
+	}
+	setTimeout('mRefresh()', 3000);
+</script>
+<% } %>
 
