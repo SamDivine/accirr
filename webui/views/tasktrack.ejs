@@ -63,3 +63,11 @@
 		]
 	});
 </script>
+<% if (listtype === 'running') { %>
+<script type="text/javascript">
+	function mRefresh() {
+		window.location.reload();
+	}
+	setTimeout('mRefresh()', 3000);
+</script>
+<% } %>
