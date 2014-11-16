@@ -18,7 +18,7 @@
 #endif
 
 #ifndef STACK_SIZE
-#define STACK_SIZE (1<<15)
+#define STACK_SIZE (1<<14)
 #endif
 
 #ifndef BLOCK_SIZE
@@ -33,7 +33,7 @@
 #define STACK_PREFETCH
 
 #ifndef READYQ_PREFETCH_DISTANCE
-#define READYQ_PREFETCH_DISTANCE 4
+#define READYQ_PREFETCH_DISTANCE 8
 #endif
 
 #endif //_COMMON_H

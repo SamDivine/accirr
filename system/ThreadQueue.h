@@ -77,7 +77,11 @@ class PrefetchingThreadQueue {
 			, len(0) {}
 		
 		void init(uint64_t prefetchDistance) {
+#ifdef USING_MALLOC
+			queues= (ThreadQueue*)malloc(sizeof(ThreadQueue)*prefetchDistance*2);
+#else
 			queues = new ThreadQueue[prefetchDistance*2];
+#endif
 			num_queues = prefetchDistance*2;
 		}
 

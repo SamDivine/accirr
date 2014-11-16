@@ -29,7 +29,11 @@ void remove_coro(Worker *c) {
 
 Worker *convert_to_master(Worker *me) {
 	if (!me) {
+#ifdef USING_MALLOC
+		me = (Worker*)malloc(sizeof(Worker));
+#else
 		me = new Worker();
+#endif
 	}
 
 	me->running = 1;
@@ -83,7 +87,11 @@ void coro_spawn(Worker *me, Worker *c, coro_func f, size_t ssize) {
 }
 
 Worker *worker_spawn(Worker *me, Scheduler *sched, thread_func f, void *arg) {
+#ifdef USING_MALLOC
+	Worker *thr = (Worker*)malloc(sizeof(Worker));
+#else
 	Worker *thr = new Worker();
+#endif
 	thr->sched = sched;
 	sched->assignTid(thr);
 	sched->workerNumInc();

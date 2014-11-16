@@ -13,8 +13,6 @@ int LIST_LEN = (1<<14);
 int REPEAT_TIMES = 1;
 int processid = 0;
 
-#define USING_MALLOC
-
 #ifndef PREFETCH_MODE
 #define PREFETCH_MODE 0
 #endif

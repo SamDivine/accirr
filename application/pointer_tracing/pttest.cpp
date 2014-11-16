@@ -10,8 +10,6 @@ int TOTAL_LISTS = (1<<11);
 int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
 
-#define USING_MALLOC
-
 #ifndef PREFETCH_MODE
 #define PREFETCH_MODE 0
 #endif
