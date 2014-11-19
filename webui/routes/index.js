@@ -30,7 +30,7 @@ function translate(mStr) {
 		replaceStr = '宽度优先搜索';
 		break;
 	case 'wordcount':
-		replaceStr = '基于Hash的查找';
+		replaceStr = '基于Hash的文本计数';
 		break;
 	default:
 		replaceStr = '测试程序';
@@ -47,8 +47,8 @@ index = function(req, res){
 running = function(req, res) {
 	db.all("SELECT * FROM RUNNING_TBL ORDER BY STARTTIME ASC", function(err, rows) {
 		if (err) {
-			req.flash('error', err);
-			return res.redirect('/');
+			console.log(err);
+			return res.redirect('/running');
 		}
 		req.listtype = 'running';
 		if (rows.length === 0) {
@@ -73,8 +73,8 @@ tasktrack = function(req, res) {
 		var cmd = "SELECT * FROM RUNNING_TBL WHERE PROGRAM = '" + mTask + "'";
 		db.all(cmd, function(err, rows) {
 			if (err) {
-				req.flash('error', err);
-				return res.redirect('/');
+				console.log(err);
+				return res.redirect('/tt/'+mTask);
 			}
 			if (rows.length !== 0) {
 				req.graphtype = 'running';
@@ -123,8 +123,8 @@ tasktrack = function(req, res) {
 finished = function (req, res) {
 	db.all("SELECT * FROM FINISHED_TBL ORDER BY FINISHTIME ASC", function(err, rows) {
 		if (err) {
-			req.flash('error', err);
-			return res.redirect('/');
+			cosole.log(err);
+			return res.redirect('/finished');
 		}
 		req.listtype = 'finished';
 		if (rows.length === 0) {

@@ -14,7 +14,7 @@ const int BIG_PRIME = 100000001;
 int CORO_NUM;
 
 int64_t INITTEXTSIZE=(1<<25);
-int64_t QUERYWORDS=(1<<26);
+int64_t QUERYWORDS=(1<<28);
 
 int64_t foundCount = 0;
 
@@ -162,6 +162,8 @@ int main(int argc, char** argv)
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec)/1000000.0;
 	cerr << "build wordlist takes " << duration << " s" << endl;
+	cerr << "press enter:" << endl;
+	getchar();
 	AccirrInit(&argc, &argv);
 	for (intptr_t i = 0; i < CORO_NUM; i++) {
 		createTask(queryTask, (void*)i);
