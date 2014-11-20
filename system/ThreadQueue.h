@@ -102,7 +102,7 @@ class PrefetchingThreadQueue {
 				dq_index = ((dq_index+1)==num_queues) ? 0 : dq_index+1;
 				len--;
 #ifdef WORKER_PREFETCH
-				__builtin_prefetch(result->next, 1, 3);
+				__builtin_prefetch(result->next, 1, WORKER_PREFETCH_LOCALITY);
 #endif
 				result->next = NULL;
 
@@ -110,9 +110,9 @@ class PrefetchingThreadQueue {
 				Worker *tstack_worker = queues[tstack].front();
 				if (tstack_worker) {
 #ifdef STACK_PREFETCH
-					__builtin_prefetch(tstack_worker->stack, 1, 3);
-					__builtin_prefetch(((char*)(tstack_worker->stack))+64, 1, 3);
-					__builtin_prefetch(((char*)(tstack_worker->stack))+128, 1, 3);
+					__builtin_prefetch(tstack_worker->stack, 1, STACK_PREFETCH_LOCALITY);
+					__builtin_prefetch(((char*)(tstack_worker->stack))+64, 1, STACK_PREFETCH_LOCALITY);
+					__builtin_prefetch(((char*)(tstack_worker->stack))+128, 1, STACK_PREFETCH_LOCALITY);
 
 #endif
 				}

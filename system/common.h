@@ -12,7 +12,7 @@
 #include <unistd.h>
 
 #ifndef STACK_SIZE
-#define STACK_SIZE (1<<14)
+#define STACK_SIZE (1<<13)
 #endif
 
 #ifndef BLOCK_SIZE
@@ -26,8 +26,16 @@
 #define WORKER_PREFETCH
 #define STACK_PREFETCH
 
+#ifndef WORKER_PREFETCH_LOCALITY
+#define WORKER_PREFETCH_LOCALITY 3
+#endif
+
+#ifndef STACK_PREFETCH_LOCALITY
+#define STACK_PREFETCH_LOCALITY 3
+#endif
+
 #ifndef READYQ_PREFETCH_DISTANCE
-#define READYQ_PREFETCH_DISTANCE 8
+#define READYQ_PREFETCH_DISTANCE 4
 #endif
 
 #endif //_COMMON_H
