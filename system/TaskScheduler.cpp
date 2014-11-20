@@ -42,7 +42,6 @@ Worker* TaskScheduler::thread_wait(void **result) {
 
 }
 
-#ifdef WEBUI
 double asecd() {
 	timeval pNow;
 	gettimeofday(&pNow, NULL);
@@ -53,4 +52,3 @@ double asecd(timeval* pNow) {
 	gettimeofday(pNow, NULL);
 	return pNow->tv_sec+pNow->tv_usec/1000000.0;
 }
-#endif

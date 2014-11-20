@@ -94,7 +94,6 @@ void tracingTask(Worker *me, void *arg) {
 	int listsPerCoro = TOTAL_LISTS/CORO_NUM;
 	int remainder = TOTAL_LISTS%CORO_NUM;
 	intptr_t idx = (intptr_t)arg;
-	//std::cerr << "coro " << idx << " start" << std::endl;
 	int mListIdx = idx*listsPerCoro + (idx>=remainder ? remainder : idx);
 	int nextListIdx = mListIdx + listsPerCoro + (idx>=remainder ? 0 : 1);
 	List* localList;
@@ -104,7 +103,6 @@ void tracingTask(Worker *me, void *arg) {
 	// TODO: tracing
 	for (int i = 0; i < REPEAT_TIMES; i++) {
 		for (int j = mListIdx; j < nextListIdx; j++) {
-			//std::cerr << "list " << j << " start" << std::endl;
 			localList = head[j];
 			while (localList != NULL) {
 #ifdef DATA_PREFETCH
@@ -116,17 +114,11 @@ void tracingTask(Worker *me, void *arg) {
 				}
 				times++;
 				localList = localList->next;
-#ifdef WEBUI
-				finishedTasks++;
-#endif
 			} 
-			//std::cerr << "list " << j << " end" << std::endl;
 		}
 	}
-	//
 	total_accum += accum;
 	tra_times += times;
-	//std::cerr << "coro " << idx << " end" << std::endl;
 }
 
 void destroyList() {

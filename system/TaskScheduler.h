@@ -8,17 +8,6 @@
 
 static uint64_t scheduler_context_switches = 0;
 static uint64_t scheduler_count = 0;
-#ifdef WEBUI
-extern double programStart;
-extern double prevPoint;
-extern double presentPoint;
-extern unsigned long long maxWorkerNum;
-extern unsigned long long contextSwitches;
-extern unsigned long long finishedTasks;
-extern char programName[256];
-extern sqlite3 *db;
-extern char* errMsg;
-#endif
 //for WEBUI mainly
 double asecd();//get absolute time in sec using double format
 double asecd(timeval* pNow);//get absolute time in sec and set pNow
@@ -48,27 +37,6 @@ private:
 			std::cerr << "Trying to context switch in no-switch region" << std::endl;
 			exit(-1);
 		}
-#ifdef WEBUI
-		if (scheduler_context_switches % 1000000 == 0) {
-			presentPoint = asecd();
-			if (presentPoint-prevPoint > 1.0) {
-				prevPoint = presentPoint;
-				double execTime = presentPoint - programStart;
-				unsigned long long workerNum = getWorkerNum();
-				if (workerNum > maxWorkerNum) {
-					maxWorkerNum = workerNum;
-				}
-				contextSwitches = scheduler_context_switches;
-				char cmd[256];
-				sprintf(cmd, "INSERT INTO TASKTRACK_TBL (ATIME, PROGRAM, EXECTIME, WORKERS, FINISHEDTASKS, CONTEXTSWITCHES) VALUES (%.2f, '%s', %.2f, %llu, %llu, %llu);", presentPoint,programName, execTime, workerNum, finishedTasks, contextSwitches);
-				int rc;
-				if ((rc = sqlite3_exec(db, cmd, NULL, NULL, &errMsg)) != SQLITE_OK) {
-					fprintf(stderr, "SQL error at insert into tasktrack table: %s\n", errMsg);
-					sqlite3_free(errMsg);
-				}
-			}
-		}
-#endif
 
 		do {
 			Worker *result;
