@@ -1,10 +1,19 @@
 CXX=g++
 
-CXXFLAGS= -O2 -fopenmp
+ACCIRR_HOME := /home/localhost/accirr
 
-TARGET=pointer_tracing old_pointer_tracing pttest newpttest
+PCM_DIR := $(ACCIRR_HOME)/third_party/intelpcm
+PCM_DEPEND += cpucounters.cpp client_bw.cpp pci.cpp msr.cpp utils.cpp
+
+vpath %.cpp $(ACCIRR_HOME)/third_party/intelpcm
+
+CXXFLAGS += -O2 -I$(PCM_DIR) -fopenmp -pthread -lrt -DUSINGMALLOC
+
+TARGET=pointer_tracing old_pointer_tracing pttest newpttest pcm_pttest
 
 all: $(TARGET)
+
+pcm_pttest:$(PCM_DEPEND)
 
 .PHONY:clean
 clean:

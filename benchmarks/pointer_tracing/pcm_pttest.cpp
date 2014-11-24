@@ -1,24 +1,20 @@
-#include <Accirr.h>
 #include <sys/time.h>
+#include <sys/time.h>
+#include <iostream>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <omp.h>
+#include <stdint.h>
 #include <sched.h>
 
 #include "cpucounters.h"
 #include "utils.h"
 
-int CORO_NUM = 2;
+int THREAD_NUM = 2;
 int TOTAL_LISTS = (1<<11);
 int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
-
-#ifndef PREFETCH_MODE
-#define PREFETCH_MODE 0
-#endif
-
-#ifndef PREFETCH_LOCALITY
-#define PREFETCH_LOCALITY 0
-#endif
 
 #ifndef LOCAL_NUM
 #define LOCAL_NUM 14
@@ -91,12 +87,10 @@ void buildList() {
 	}
 }
 
-void tracingTask(Worker *me, void *arg) {
+void tracingTask(int idx) {
 	// TODO: arg parse
-	int listsPerCoro = TOTAL_LISTS/CORO_NUM;
-	int remainder = TOTAL_LISTS%CORO_NUM;
-	intptr_t idx = (intptr_t)arg;
-	//std::cerr << "coro " << idx << " start" << std::endl;
+	int listsPerCoro = TOTAL_LISTS/THREAD_NUM;
+	int remainder = TOTAL_LISTS%THREAD_NUM;
 	int mListIdx = idx*listsPerCoro + (idx>=remainder ? remainder : idx);
 	int nextListIdx = mListIdx + listsPerCoro + (idx>=remainder ? 0 : 1);
 	List* localList;
@@ -106,26 +100,19 @@ void tracingTask(Worker *me, void *arg) {
 	// TODO: tracing
 	for (int i = 0; i < REPEAT_TIMES; i++) {
 		for (int j = mListIdx; j < nextListIdx; j++) {
-			//std::cerr << "list " << j << " start" << std::endl;
 			localList = head[j];
 			while (localList != NULL) {
-#ifdef DATA_PREFETCH
-				__builtin_prefetch(localList, PREFETCH_MODE, PREFETCH_LOCALITY);
-				yield();
-#endif
 				for (int k = 0; k < LOCAL_NUM; k++) {
 					accum += localList->data[k];
 				}
 				times++;
 				localList = localList->next;
 			} 
-			//std::cerr << "list " << j << " end" << std::endl;
 		}
 	}
 	//
 	total_accum += accum;
 	tra_times += times;
-	//std::cerr << "coro " << idx << " end" << std::endl;
 }
 
 void destroyList() {
@@ -171,7 +158,7 @@ int main(int argc, char** argv)
 	case 3:
 		REPEAT_TIMES = atoi(argv[2]);
 	case 2:
-		CORO_NUM = atoi(argv[1]);
+		THREAD_NUM = atoi(argv[1]);
         break;
     default:
         break;
@@ -213,20 +200,24 @@ int main(int argc, char** argv)
 	listsLen = new int[TOTAL_LISTS];
 	listNumber = new int[TOTAL_LISTS];
 #endif
-	AccirrInit(&argc, &argv);
 	gettimeofday(&start, NULL);
 	buildList();
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
 	//getchar();
-	for (intptr_t i = 0; i < CORO_NUM; i++) {
-		createTask(tracingTask, (void*)i);
-	}
 	gettimeofday(&start, NULL);
 	SystemCounterState sstate1 = getSystemCounterState();
-	AccirrRun();
-	AccirrFinalize();
+#pragma omp parallel for
+	for (int i = 0; i < THREAD_NUM; i++) {
+		cpu_set_t mask;
+		CPU_ZERO(&mask);
+		CPU_SET(processorid, &mask);
+		if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
+			std::cerr << "could not set CPU affinity in thread " << omp_get_thread_num() << std::endl;
+		}
+		tracingTask(i);
+	}
 	SystemCounterState sstate2 = getSystemCounterState();
 	gettimeofday(&end, NULL);
 	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;

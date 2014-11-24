@@ -12,8 +12,6 @@ int TOTAL_LISTS = (1<<11);
 int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
 
-#define USING_MALLOC
-
 #ifndef LOCAL_NUM
 #define LOCAL_NUM 14
 #endif
@@ -89,7 +87,6 @@ void tracingTask(int idx) {
 	// TODO: arg parse
 	int listsPerCoro = TOTAL_LISTS/THREAD_NUM;
 	int remainder = TOTAL_LISTS%THREAD_NUM;
-	//std::cerr << "coro " << idx << " start" << std::endl;
 	int mListIdx = idx*listsPerCoro + (idx>=remainder ? remainder : idx);
 	int nextListIdx = mListIdx + listsPerCoro + (idx>=remainder ? 0 : 1);
 	List* localList;
@@ -99,7 +96,6 @@ void tracingTask(int idx) {
 	// TODO: tracing
 	for (int i = 0; i < REPEAT_TIMES; i++) {
 		for (int j = mListIdx; j < nextListIdx; j++) {
-			//std::cerr << "list " << j << " start" << std::endl;
 			localList = head[j];
 			while (localList != NULL) {
 				for (int k = 0; k < LOCAL_NUM; k++) {
@@ -108,13 +104,11 @@ void tracingTask(int idx) {
 				times++;
 				localList = localList->next;
 			} 
-			//std::cerr << "list " << j << " end" << std::endl;
 		}
 	}
 	//
 	total_accum += accum;
 	tra_times += times;
-	//std::cerr << "coro " << idx << " end" << std::endl;
 }
 
 void destroyList() {

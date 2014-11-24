@@ -6,9 +6,9 @@ PREFETCH := -DDATA_PREFETCH
 
 MODE := -DPREFECH_MODE=1
 
-LOCALICY := -DPREFETCH_LOCALITY=1
+LOCALICY := -DPREFETCH_LOCALITY=2
 
-CXXFLAGS += $(PREFETCH) $(MODE) $(LOCALICY) -pthread -lrt -DUSING_MALLOC -g
+CXXFLAGS += $(PREFETCH) $(MODE) $(LOCALICY) -pthread -lrt -DUSING_MALLOC
 TARGET=pointer_tracing old_pointer_tracing pttest mppttest pcm_pttest
 
 all:$(TARGET)

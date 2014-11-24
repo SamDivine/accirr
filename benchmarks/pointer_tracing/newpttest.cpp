@@ -11,8 +11,6 @@ int TOTAL_LISTS = (1<<11);
 int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
 
-#define USING_MALLOC
-
 #ifndef LOCAL_NUM
 #define LOCAL_NUM 14
 #endif
