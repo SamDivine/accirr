@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TOGETHERS="1 2 4 8 12 16"
+TOGETHERS="8 12 16 32 64 128 256 512 1024"
 REPEAT=1
 
 #OUTPUT="omp_pttest.csv"

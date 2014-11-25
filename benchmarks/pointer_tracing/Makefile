@@ -9,11 +9,13 @@ vpath %.cpp $(ACCIRR_HOME)/third_party/intelpcm
 
 CXXFLAGS += -O2 -I$(PCM_DIR) -fopenmp -pthread -lrt -DUSINGMALLOC
 
-TARGET=pointer_tracing old_pointer_tracing pttest newpttest pcm_pttest
+TARGET=pointer_tracing old_pointer_tracing pttest newpttest pcm_pttest newpcm_pttest
 
 all: $(TARGET)
 
 pcm_pttest:$(PCM_DEPEND)
+
+newpcm_pttest:$(PCM_DEPEND)
 
 .PHONY:clean
 clean:

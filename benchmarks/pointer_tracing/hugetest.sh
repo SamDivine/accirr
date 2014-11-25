@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THREADS="8 16 32 64 128"
+THREADS="8 16 32 64 128 256 512 1024"
 REPEAT=1
 
 #OUTPUT="omp_pttest_hugepage.csv"

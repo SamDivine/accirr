@@ -1,24 +1,19 @@
-#include <Accirr.h>
 #include <sys/time.h>
+#include <iostream>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
+
 #include <sched.h>
 
 #include "cpucounters.h"
 #include "utils.h"
 
-int CORO_NUM = 2;
+int TOGETHER_NUM = 2;
 int TOTAL_LISTS = (1<<11);
 int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
-
-#ifndef PREFETCH_MODE
-#define PREFETCH_MODE 0
-#endif
-
-#ifndef PREFETCH_LOCALITY
-#define PREFETCH_LOCALITY 0
-#endif
 
 #ifndef LOCAL_NUM
 #define LOCAL_NUM 14
@@ -46,6 +41,7 @@ List** allList;
 int* listsLen;
 int* listNumber;
 
+int tofillLists = TOTAL_LISTS;
 
 void insertToListI(int i, List* l) {
 	if (head[i] == NULL) {
@@ -59,7 +55,6 @@ void insertToListI(int i, List* l) {
 }
 
 void buildList() {
-	int tofillLists = TOTAL_LISTS;
     int value = 0;
 	for(int i = 0; i < TOTAL_LISTS; i++) {
 		head[i] = NULL;
@@ -91,36 +86,47 @@ void buildList() {
 	}
 }
 
-void tracingTask(Worker *me, void *arg) {
+void tracingTask(int idx) {
 	// TODO: arg parse
-	int listsPerCoro = TOTAL_LISTS/CORO_NUM;
-	int remainder = TOTAL_LISTS%CORO_NUM;
-	intptr_t idx = (intptr_t)arg;
-	int mListIdx = idx*listsPerCoro + (idx>=remainder ? remainder : idx);
-	int nextListIdx = mListIdx + listsPerCoro + (idx>=remainder ? 0 : 1);
-	List* localList;
+	//std::cerr << "coro " << idx << " start" << std::endl;
+	int remainder = TOTAL_LISTS%TOGETHER_NUM;
+	int listPerTask = TOGETHER_NUM;
+	int mListIdx = idx*listPerTask;
+	int mListNum = idx<(TOTAL_LISTS/TOGETHER_NUM) ? listPerTask : remainder;
+	int nextListIdx = mListIdx + mListNum;
+	bool* listEnd = new bool[mListNum];
 	//
 	int64_t accum = 0;
 	int64_t times = 0;
 	// TODO: tracing
 	for (int i = 0; i < REPEAT_TIMES; i++) {
+		int finishedList = mListNum;
 		for (int j = mListIdx; j < nextListIdx; j++) {
-			localList = head[j];
-			while (localList != NULL) {
-#ifdef DATA_PREFETCH
-				__builtin_prefetch(localList, PREFETCH_MODE, PREFETCH_LOCALITY);
-				yield();
-#endif
-				for (int k = 0; k < LOCAL_NUM; k++) {
-					accum += localList->data[k];
-				}
-				times++;
-				localList = localList->next;
-			} 
+			allList[j] = head[j];
+			listEnd[j-mListIdx] = false;
 		}
+		while (finishedList > 0) {
+			for (int j = mListIdx; j < nextListIdx; j++) {
+				if (allList[j] != NULL) {
+					for (int k = 0; k < LOCAL_NUM; k++) {
+						accum += allList[j]->data[k];
+					}
+					times++;
+					allList[j] = allList[j]->next;
+				} else {
+					if (!listEnd[j-mListIdx]) {
+						finishedList--;
+						listEnd[j-mListIdx] = true;
+					}
+					continue;
+				}
+			}
+		}	
 	}
+	//
 	total_accum += accum;
 	tra_times += times;
+	//std::cerr << "coro " << idx << " end" << std::endl;
 }
 
 void destroyList() {
@@ -157,16 +163,15 @@ void destroyList() {
 
 int main(int argc, char** argv)
 {
-	set_signal_handlers();
     switch(argc) {
     case 5:
         LIST_LEN = (1<<atoi(argv[4]));
     case 4:
-        TOTAL_LISTS = (1<<atoi(argv[3]));
+        TOTAL_LISTS = atoi(argv[3]);
 	case 3:
 		REPEAT_TIMES = atoi(argv[2]);
 	case 2:
-		CORO_NUM = atoi(argv[1]);
+		TOGETHER_NUM = atoi(argv[1]);
         break;
     default:
         break;
@@ -213,15 +218,21 @@ int main(int argc, char** argv)
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
-	//getchar();
-	AccirrInit(&argc, &argv);
-	for (intptr_t i = 0; i < CORO_NUM; i++) {
-		createTask(tracingTask, (void*)i);
-	}
 	gettimeofday(&start, NULL);
+	int loopNum = TOTAL_LISTS/TOGETHER_NUM;
 	SystemCounterState sstate1 = getSystemCounterState();
-	AccirrRun();
-	AccirrFinalize();
+	if (TOTAL_LISTS%TOGETHER_NUM != 0) {
+		loopNum++;
+	}
+	for (int i = 0; i < loopNum; i++) {
+		/*cpu_set_t mask;
+		CPU_ZERO(&mask);
+		CPU_SET(processorid, &mask);
+		if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
+			std::cerr << "could not set CPU affinity in thread " << omp_get_thread_num() << std::endl;
+		}*/
+		tracingTask(i);
+	}
 	SystemCounterState sstate2 = getSystemCounterState();
 	gettimeofday(&end, NULL);
 	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
