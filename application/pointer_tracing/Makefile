@@ -4,9 +4,9 @@ PCM_DEPEND += cpucounters.cpp client_bw.cpp pci.cpp msr.cpp utils.cpp
 
 PREFETCH := -DDATA_PREFETCH
 
-MODE := -DPREFECH_MODE=0
+MODE := -DPREFECH_MODE=1
 
-LOCALICY := -DPREFETCH_LOCALITY=0
+LOCALICY := -DPREFETCH_LOCALITY=3
 
 CXXFLAGS += $(PREFETCH) $(MODE) $(LOCALICY) -pthread -lrt -DUSING_MALLOC
 TARGET=pointer_tracing old_pointer_tracing pttest mppttest pcm_pttest

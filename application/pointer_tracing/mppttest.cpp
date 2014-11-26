@@ -47,7 +47,6 @@ List** allList;
 int* listsLen;
 int* listNumber;
 
-int tofillLists = TOTAL_LISTS;
 
 void insertToListI(int i, List* l) {
 	if (head[i] == NULL) {
@@ -61,6 +60,7 @@ void insertToListI(int i, List* l) {
 }
 
 void buildList() {
+	int tofillLists = TOTAL_LISTS;
     int value = 0;
 	for(int i = 0; i < TOTAL_LISTS; i++) {
 		head[i] = NULL;

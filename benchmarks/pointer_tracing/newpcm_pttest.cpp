@@ -41,7 +41,6 @@ List** allList;
 int* listsLen;
 int* listNumber;
 
-int tofillLists = TOTAL_LISTS;
 
 void insertToListI(int i, List* l) {
 	if (head[i] == NULL) {
@@ -55,6 +54,7 @@ void insertToListI(int i, List* l) {
 }
 
 void buildList() {
+	int tofillLists = TOTAL_LISTS;
     int value = 0;
 	for(int i = 0; i < TOTAL_LISTS; i++) {
 		head[i] = NULL;
@@ -88,7 +88,6 @@ void buildList() {
 
 void tracingTask(int idx) {
 	// TODO: arg parse
-	//std::cerr << "coro " << idx << " start" << std::endl;
 	int remainder = TOTAL_LISTS%TOGETHER_NUM;
 	int listPerTask = TOGETHER_NUM;
 	int mListIdx = idx*listPerTask;
@@ -123,10 +122,8 @@ void tracingTask(int idx) {
 			}
 		}	
 	}
-	//
 	total_accum += accum;
 	tra_times += times;
-	//std::cerr << "coro " << idx << " end" << std::endl;
 }
 
 void destroyList() {
@@ -167,7 +164,7 @@ int main(int argc, char** argv)
     case 5:
         LIST_LEN = (1<<atoi(argv[4]));
     case 4:
-        TOTAL_LISTS = atoi(argv[3]);
+        TOTAL_LISTS = (1<<atoi(argv[3]));
 	case 3:
 		REPEAT_TIMES = atoi(argv[2]);
 	case 2:
