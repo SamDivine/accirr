@@ -170,6 +170,8 @@ int main(int argc, char** argv)
 	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
 		std::cerr << "could not set CPU affinity in main thread " << std::endl;
 	}
+	std::cerr << "bind to core " << processorid << std::endl;
+	omp_set_num_threads(THREAD_NUM);
 	PCM *m = PCM::getInstance();
 	PCM::CustomCoreEventDescription mEvents[4];
 	uint64_t mCounts[4];

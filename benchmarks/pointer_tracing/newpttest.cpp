@@ -194,7 +194,7 @@ int main(int argc, char** argv)
 	gettimeofday(&start, NULL);
 	buildList();
 	gettimeofday(&end, NULL);
-	long duration = 1000000*(end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec);
+	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
 	gettimeofday(&start, NULL);
 	int loopNum = TOTAL_LISTS/TOGETHER_NUM;
@@ -211,9 +211,9 @@ int main(int argc, char** argv)
 		tracingTask(i);
 	}
 	gettimeofday(&end, NULL);
-	duration = 1000000*(end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec);
-	std::cout << "traverse duration " << duration << " us accum " << total_accum << " traverse " << tra_times << std::endl;
-	std::cerr << "traverse duration " << duration << " us accum " << total_accum << " traverse " << tra_times << std::endl;
+	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
+	std::cout << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times << std::endl;
+	std::cerr << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times << std::endl;
 
 	destroyList();
 
