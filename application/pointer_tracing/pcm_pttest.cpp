@@ -4,8 +4,7 @@
 #include <unistd.h>
 #include <sched.h>
 
-#include "cpucounters.h"
-#include "utils.h"
+#include "customcounters.h"
 
 int CORO_NUM = 2;
 int TOTAL_LISTS = (1<<11);
@@ -157,7 +156,6 @@ void destroyList() {
 
 int main(int argc, char** argv)
 {
-	set_signal_handlers();
     switch(argc) {
     case 5:
         LIST_LEN = (1<<atoi(argv[4]));
@@ -179,22 +177,7 @@ int main(int argc, char** argv)
 	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
 		std::cerr << "could not set CPU affinity in main thread " << std::endl;
 	}
-	PCM *m = PCM::getInstance();
-	PCM::CustomCoreEventDescription mEvents[4];
-	uint64_t mCounts[4];
-	mEvents[0].event_number = DTLB_LOAD_MISS_CAUSE_WALK_EVTNR;
-	mEvents[0].umask_value = DTLB_LOAD_MISS_CAUSE_WALK_UMASK;
-	mEvents[1].event_number = UOPS_ISSUED_ANY_EVTNR;
-	mEvents[1].umask_value = UOPS_ISSUED_ANY_UMASK;
-	mEvents[2].event_number = MEM_LOAD_UOPS_RETIRED_L2_HIT_EVTNR;
-	mEvents[2].umask_value = MEM_LOAD_UOPS_RETIRED_L2_HIT_UMASK;
-	mEvents[3].event_number = MEM_LOAD_UOPS_RETIRED_L2_MISS_EVTNR;
-	mEvents[3].umask_value = MEM_LOAD_UOPS_RETIRED_L2_MISS_UMASK;
-	if (m->good()) {
-		m->resetPMU();
-		m->program(PCM::CUSTOM_CORE_EVENTS, &mEvents);
-	} else {
-		std::cerr << "can't access PMU" << std::endl;
+	if (customPcmInit() < 0) {
 		return -1;
 	}
 #ifdef USING_MALLOC
@@ -225,17 +208,10 @@ int main(int argc, char** argv)
 	SystemCounterState sstate2 = getSystemCounterState();
 	gettimeofday(&end, NULL);
 	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
-	for (int i = 0; i < 4; i++) {
-		mCounts[i] = getNumberOfCustomEvents(i, sstate1, sstate2);
-	}
-	double tlbLoadMissPerSec = mCounts[0]/duration;
-	double uopsAny = mCounts[1];
-	double l2Hit = mCounts[2];
-	double l2Miss = mCounts[3];
-	double l2Load = l2Hit+l2Miss;
-	double l2HitRatio = l2Hit/l2Load;
-	std::cout << "traverse duration " << duration << " s tlbloadmiss/s " << tlbLoadMissPerSec << " uopsAny " << uopsAny << " l2hit,load,hitratio " << l2Hit << ", " << l2Load << ", " << l2HitRatio << std::endl;
-	std::cerr << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times <<  " tlbloadmiss/s " << tlbLoadMissPerSec << " uopsAny " << uopsAny << " l2hit,load,hitratio " << l2Hit << ", " << l2Load << ", " << l2HitRatio << std::endl;
+	std::cout << "traverse duration " << duration << " s" << std::endl;
+	std::cerr << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times << std::endl;
+
+	customPcmPrint(sstate1, sstate2, duration);
 
 	destroyList();
 

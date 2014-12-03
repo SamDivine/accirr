@@ -73,10 +73,10 @@ typedef signed int int32;
 // Event IDs
 
 // Events on Intel 3rd generation CPU
-#define UOPS_ISSUED_ANY_EVTNR (0x0e)
+#define UOPS_ISSUED_ANY_EVTNR (0x0E)
 #define UOPS_ISSUED_ANY_UMASK (0x01)
 
-#define UOPS_RETIRED_ALL_EVTNR (0xc2)
+#define UOPS_RETIRED_ALL_EVTNR (0xC2)
 #define UOPS_RETIRED_ALL_UMASK (0x01)
 
 #define DTLB_LOAD_MISS_CAUSE_WALK_EVTNR	(0x08)
@@ -146,6 +146,9 @@ typedef signed int int32;
 
 #define ARCH_LLC_MISS_EVTNR     (0x2E)
 #define ARCH_LLC_MISS_UMASK     (0x41)
+
+#define ARCH_INST_RETIRED_EVTNR	(0xC0)
+#define ARCH_INST_RETIRED_UMASK	(0x00)
 
 // Atom on-core events
 
