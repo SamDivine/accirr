@@ -2,18 +2,18 @@ include ../Makefile
 
 PCM_DEPEND += cpucounters.cpp client_bw.cpp pci.cpp msr.cpp utils.cpp
 
-PREFETCH := -DDATA_PREFETCH
+#PREFETCH := -DDATA_PREFETCH
 
-MODE := -DPREFECH_MODE=1
+#MODE := -DPREFECH_MODE=0
 
-LOCALICY := -DPREFETCH_LOCALITY=3
+#LOCALICY := -DPREFETCH_LOCALITY=3
 
 CXXFLAGS += $(PREFETCH) $(MODE) $(LOCALICY) -pthread -lrt -DUSING_MALLOC
-TARGET=hello_world
+TARGET=pureyield
 
 all:$(TARGET)
 
-hello_world:$(DEPEND) $(LIB)
+pureyield:$(DEPEND) $(LIB) $(PCM_DEPEND)
 
 
 .PHONY:clean

@@ -202,16 +202,16 @@ int main(int argc, char** argv)
 		createTask(tracingTask, (void*)i);
 	}
 	gettimeofday(&start, NULL);
-	SystemCounterState sstate1 = getSystemCounterState();
+	CoreCounterState beforeState = getCoreCounterState(processorid);
 	AccirrRun();
 	AccirrFinalize();
-	SystemCounterState sstate2 = getSystemCounterState();
+	CoreCounterState afterState = getCoreCounterState(processorid);
 	gettimeofday(&end, NULL);
 	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cout << "traverse duration " << duration << " s" << std::endl;
 	std::cerr << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times << std::endl;
 
-	customPcmPrint(sstate1, sstate2, duration);
+	customPcmPrint(beforeState, afterState, duration);
 
 	destroyList();
 

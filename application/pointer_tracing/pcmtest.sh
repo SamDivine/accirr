@@ -1,29 +1,29 @@
 #!/bin/bash
 
-COROS="8 16 32 64 128 256 512 1024"
+COROS="8 16 32 64 128 256 512 1024 2048 4096 8192 16384 32768"
 REPEAT=1
 MODE="0 1"
 LOCALITY="0 1 2 3"
 
-OUTPUT="pcm_test_output_locality22.txt"
+OUTPUTNORMAL="pcm_test_output_locality00_normal.txt"
+OUTPUTHUGEPAGE="pcm_test_output_locality00_hugepage.txt"
 
-HUGEFLAG="LD_PRELOAD=../../lib/libhugetlbfs.so HUGETLB_MORECORE=1g"
-
-if [ -e $OUTPUT ]; then
-	rm $OUTPUT
+if [ -e $OUTPUTNORMAL ]; then
+	rm $OUTPUTNORMAL
 fi
-
-echo Worker and Stack Prefetch with locality 2, 2 >> $OUTPUT
+if [ -e $OUTPUTHUGEPAGE ]; then
+	rm $OUTPUTHUGEPAGE
+fi
 
 for i in $MODE; do
 	for j in $LOCALITY; do
 		./gen.sh $i $j
 		for k in $COROS; do
 			echo run pttest with $k coro, mode $i, locality $j
-			echo $k $i $j normal >> $OUTPUT
-			./pcm_pttest $k $REPEAT >> $OUTPUT
-			echo $k $i $j hugepage >> $OUTPUT
-			LD_PRELOAD=../../lib/libhugetlbfs.so HUGETLB_MORECORE=1g ./pcm_pttest $k $REPEAT >> $OUTPUT
+			echo $k $i $j >> $OUTPUTNORMAL
+			./pcm_pttest $k $REPEAT >> $OUTPUTNORMAL
+			echo $k $i $j >> $OUTPUTHUGEPAGE
+			LD_PRELOAD=../../lib/libhugetlbfs.so HUGETLB_MORECORE=1g ./pcm_pttest $k $REPEAT >> $OUTPUTHUGEPAGE
 		sleep 10
 		done
 	done
