@@ -90,18 +90,16 @@ void tracingTask(int idx) {
 	int mListIdx = idx*listPerTask;
 	int mListNum = idx<(TOTAL_LISTS/TOGETHER_NUM) ? listPerTask : remainder;
 	int nextListIdx = mListIdx + mListNum;
-	bool* listEnd = new bool[mListNum];
 	//
 	int64_t accum = 0;
 	int64_t times = 0;
 	// TODO: tracing
 	for (int i = 0; i < REPEAT_TIMES; i++) {
-		int finishedList = mListNum;
+		bool shouldFinish = false;
 		for (int j = mListIdx; j < nextListIdx; j++) {
 			allList[j] = head[j];
-			listEnd[j-mListIdx] = false;
 		}
-		while (finishedList > 0) {
+		while (!shouldFinish) {
 			for (int j = mListIdx; j < nextListIdx; j++) {
 				if (allList[j] != NULL) {
 					for (int k = 0; k < LOCAL_NUM; k++) {
@@ -110,11 +108,8 @@ void tracingTask(int idx) {
 					times++;
 					allList[j] = allList[j]->next;
 				} else {
-					if (!listEnd[j-mListIdx]) {
-						finishedList--;
-						listEnd[j-mListIdx] = true;
-					}
-					continue;
+					shouldFinish = true;
+					break;
 				}
 			}
 		}	
