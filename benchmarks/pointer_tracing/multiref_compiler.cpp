@@ -6,7 +6,7 @@
 
 #include <sched.h>
 
-int TOGETHER_NUM = 2;
+int TOGETHER_NUM = 64;
 int TOTAL_LISTS = (1<<11);
 int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
@@ -82,6 +82,8 @@ void buildList() {
 	}
 }
 
+#pragma GCC push_options
+#pragma GCC optimize ("unroll-loops")
 void tracingTask(int idx) {
 	// TODO: arg parse
 	int remainder = TOTAL_LISTS%TOGETHER_NUM;
@@ -93,30 +95,26 @@ void tracingTask(int idx) {
 	int64_t accum = 0;
 	int64_t times = 0;
 	// TODO: tracing
-	for (int i = 0; i < REPEAT_TIMES; i++) {
-		bool shouldFinish = false;
-		for (int j = mListIdx; j < nextListIdx; j++) {
-			allList[j] = head[j];
-		}
-		while (!shouldFinish) {
-			for (int j = mListIdx; j < nextListIdx; j++) {
-				if (allList[j] != NULL) {
-					for (int k = 0; k < LOCAL_NUM; k++) {
-						accum += allList[j]->data[k];
-					}
-					times++;
-					allList[j] = allList[j]->next;
-				} else {
-					shouldFinish = true;
-					break;
-				}
-			}
-		}	
+	for (int j = mListIdx; j < nextListIdx; j++) {
+		allList[j] = head[j];
 	}
+	while (1) {
+		if (allList[mListIdx] == NULL) {
+			break;
+		}
+		for (int j = mListIdx; j < nextListIdx; j++) {
+			for (int k = 0; k < LOCAL_NUM; k++) {
+				accum += allList[j]->data[k];
+			}
+			times++;
+			allList[j] = allList[j]->next;
+		}
+	}	
 	//
 	total_accum += accum;
 	tra_times += times;
 }
+#pragma GCC pop_options
 
 void destroyList() {
 	// free list
@@ -156,7 +154,7 @@ int main(int argc, char** argv)
     case 5:
         LIST_LEN = (1<<atoi(argv[4]));
     case 4:
-        TOTAL_LISTS = (1<<atoi(argv[3]));
+        TOTAL_LISTS = atoi(argv[3]);
 	case 3:
 		REPEAT_TIMES = atoi(argv[2]);
 	case 2:
