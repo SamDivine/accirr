@@ -6,6 +6,8 @@
 
 #include <sched.h>
 
+#include "customcounters.h"
+
 int TOGETHER_NUM = 64;
 int TOTAL_LISTS = (1<<11);
 int LIST_LEN = (1<<15);
@@ -167,6 +169,9 @@ int main(int argc, char** argv)
 	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
 		std::cerr << "could not set CPU affinity in main thread " << std::endl;
 	}
+	if (customPcmInit() < 0) {
+		return -1;
+	}
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
     allList = (List**)malloc(TOTAL_LISTS*sizeof(List*));
@@ -188,13 +193,16 @@ int main(int argc, char** argv)
 	if (TOTAL_LISTS%TOGETHER_NUM != 0) {
 		loopNum++;
 	}
+	CoreCounterState before = getCoreCounterState(processorid);
 	for (int i = 0; i < loopNum; i++) {
 		tracingTask(i);
 	}
+	CoreCounterState after = getCoreCounterState(processorid);
 	gettimeofday(&end, NULL);
 	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cout << "traverse duration " << duration << " s" << std::endl;
 	std::cerr << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times << std::endl;
+	customPcmPrint(before, after, duration);
 
 	destroyList();
 

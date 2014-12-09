@@ -168,7 +168,6 @@ int main(int argc, char** argv)
 	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
 		std::cerr << "could not set CPU affinity in main thread " << std::endl;
 	}
-	std::cerr << "bind to core " << processorid << std::endl;
 	omp_set_num_threads(THREAD_NUM);
 	if (customPcmInit() < 0) {
 		return -1;
@@ -191,7 +190,7 @@ int main(int argc, char** argv)
 	std::cerr << "build duration = " << duration << std::endl;
 	//getchar();
 	gettimeofday(&start, NULL);
-	SystemCounterState sstate1 = getSystemCounterState();
+	CoreCounterState before = getCoreCounterState(processorid);
 #pragma omp parallel for
 	for (int i = 0; i < THREAD_NUM; i++) {
 		cpu_set_t mask;
@@ -202,12 +201,12 @@ int main(int argc, char** argv)
 		}
 		tracingTask(i);
 	}
-	SystemCounterState sstate2 = getSystemCounterState();
+	CoreCounterState after = getCoreCounterState(processorid);
 	gettimeofday(&end, NULL);
 	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cout << "traverse duration " << duration << " s" << std::endl;
 	std::cerr << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times << std::endl;
-	customPcmPrint(sstate1, sstate2, duration);
+	customPcmPrint(before, after, duration);
 
 	destroyList();
 
