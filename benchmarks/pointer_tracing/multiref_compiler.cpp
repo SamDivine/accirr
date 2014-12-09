@@ -91,10 +91,9 @@ void tracingTask(int idx) {
 	int mListIdx = idx*listPerTask;
 	int mListNum = idx<(TOTAL_LISTS/TOGETHER_NUM) ? listPerTask : remainder;
 	int nextListIdx = mListIdx + mListNum;
-	//
+
 	int64_t accum = 0;
 	int64_t times = 0;
-	// TODO: tracing
 	for (int j = mListIdx; j < nextListIdx; j++) {
 		allList[j] = head[j];
 	}
@@ -110,7 +109,6 @@ void tracingTask(int idx) {
 			allList[j] = allList[j]->next;
 		}
 	}	
-	//
 	total_accum += accum;
 	tra_times += times;
 }
@@ -193,12 +191,6 @@ int main(int argc, char** argv)
 		loopNum++;
 	}
 	for (int i = 0; i < loopNum; i++) {
-		/*cpu_set_t mask;
-		CPU_ZERO(&mask);
-		CPU_SET(processorid, &mask);
-		if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
-			std::cerr << "could not set CPU affinity in thread " << omp_get_thread_num() << std::endl;
-		}*/
 		tracingTask(i);
 	}
 	gettimeofday(&end, NULL);

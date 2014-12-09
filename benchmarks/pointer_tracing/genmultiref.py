@@ -102,22 +102,6 @@ void buildList() {
 	}
 }
 
-void tracingTask(int idx) {
-	List* localList;
-	int64_t accum = 0;
-	int64_t times = 0;
-	localList = head[j];
-	while (localList != NULL) {
-	    for (int k = 0; k < LOCAL_NUM; k++) {
-		accum += localList->data[k];
-	    }
-	    times++;
-	    localList = localList->next;
-	} 
-	total_accum += accum;
-	tra_times += times;
-}
-
 void destroyList() {
 	// free list
 #ifdef USING_MALLOC
@@ -160,8 +144,6 @@ int main(int argc, char** argv)
 	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
 		std::cerr << "could not set CPU affinity in main thread " << std::endl;
 	}
-	std::cerr << "bind to core " << processorid << std::endl;
-	omp_set_num_threads(THREAD_NUM);
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
     allList = (List**)malloc(TOTAL_LISTS*sizeof(List*));
@@ -184,9 +166,27 @@ outputContent+=concurrency
 outputContent+=''') {'''
 
 for i in range(int(concurrency)):
+    offset = bytes(i)
     outputContent+=('''
-            tracingTask(i+'''+bytes(i)+''');''')
+            allList[i+'''+offset+'''] = head[i+'''+offset+'''];''')
+
 outputContent+='''
+            while (1) {
+                if (allList[i] == NULL) {
+                    break;
+                }'''
+LOCAL_NUM=14;
+for i in range(int(concurrency)):
+    offset = bytes(i)
+    for j in range(LOCAL_NUM):
+        joffset = bytes(j)
+        outputContent+=('''
+                total_accum += allList[i+'''+offset+''']->data['''+joffset+'''];''')
+    outputContent+=('''
+                tra_times++;
+                allList[i+'''+offset+'''] = allList[i+'''+offset+''']->next;''')
+outputContent+='''
+            }
         }
 	gettimeofday(&end, NULL);
 	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
