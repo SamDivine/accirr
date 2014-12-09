@@ -45,7 +45,6 @@ void insertToListI(int i, List* l) {
 		allList[i]->next = l;
 	}
 	allList[i] = l;
-	//allList[i]->next = head[i];
 	allList[i]->next = NULL;
 }
 
@@ -57,7 +56,7 @@ void buildList() {
 		listsLen[i] = 0;
 		listNumber[i] = i;
 	}
-	// build list using malloc
+	// build list
 	int idx;
 	while (tofillLists > 0) {
 		idx = rand()%tofillLists;
@@ -85,7 +84,6 @@ void buildList() {
 #pragma GCC push_options
 #pragma GCC optimize ("unroll-loops")
 void tracingTask(int idx) {
-	// TODO: arg parse
 	int remainder = TOTAL_LISTS%TOGETHER_NUM;
 	int listPerTask = TOGETHER_NUM;
 	int mListIdx = idx*listPerTask;

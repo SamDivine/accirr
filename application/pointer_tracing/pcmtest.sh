@@ -5,8 +5,8 @@ REPEAT=1
 MODE="0 1"
 LOCALITY="0 1 2 3"
 
-OUTPUTNORMAL="pcm_test_output_locality00_normal.txt"
-OUTPUTHUGEPAGE="pcm_test_output_locality00_hugepage.txt"
+OUTPUTNORMAL="pcm_test_only_worker_prefetch0_normal.txt"
+OUTPUTHUGEPAGE="pcm_test_only_worker_prefetch0_hugepage.txt"
 
 if [ -e $OUTPUTNORMAL ]; then
 	rm $OUTPUTNORMAL

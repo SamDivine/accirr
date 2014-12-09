@@ -17,17 +17,17 @@ if int(listNum)%int(concurrency) != 0:
 
 fileHandle = open('multiref_source.cpp', 'w')
 
+LOCAL_NUM=14
+
 outputContent='''
 #include <sys/time.h>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <omp.h>
 
 #include <sched.h>
 
-int THREAD_NUM = 2;
 int TOTAL_LISTS = '''
 outputContent+=listNum
 outputContent+=''';
@@ -175,7 +175,6 @@ outputContent+='''
                 if (allList[i] == NULL) {
                     break;
                 }'''
-LOCAL_NUM=14;
 for i in range(int(concurrency)):
     offset = bytes(i)
     for j in range(LOCAL_NUM):
