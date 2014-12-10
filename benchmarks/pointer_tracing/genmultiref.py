@@ -15,8 +15,6 @@ if int(listNum)%int(concurrency) != 0:
     print 'listNum%concurrency should be 0'
     sys.exit();
 
-fileHandle = open('multiref_source.cpp', 'w')
-
 LOCAL_NUM=14
 
 outputContent='''
@@ -196,6 +194,8 @@ outputContent+='''
 
 	return 0;
 }'''
+fileHandle = open('multiref_source.cpp', 'w')
+
 fileHandle.write(outputContent);
 
 fileHandle.close();
