@@ -111,8 +111,8 @@ class PrefetchingThreadQueue {
 				if (tstack_worker) {
 #ifdef STACK_PREFETCH
 					__builtin_prefetch(tstack_worker->stack, 1, STACK_PREFETCH_LOCALITY);
-					__builtin_prefetch(((char*)(tstack_worker->stack))+64, 1, STACK_PREFETCH_LOCALITY);
-					__builtin_prefetch(((char*)(tstack_worker->stack))+128, 1, STACK_PREFETCH_LOCALITY);
+					//__builtin_prefetch(((char*)(tstack_worker->stack))+64, 1, STACK_PREFETCH_LOCALITY);
+					//__builtin_prefetch(((char*)(tstack_worker->stack))+128, 1, STACK_PREFETCH_LOCALITY);
 
 #endif
 				}

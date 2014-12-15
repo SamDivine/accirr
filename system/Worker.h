@@ -32,8 +32,10 @@ public:
 	size_t ssize;
 	threadid_t id;
 
+#ifdef CORO_DEBUG
 	Worker *tracking_prev;
 	Worker *tracking_next;
+#endif
 
 	inline intptr_t stack_remaining() {
 		register long rsp asm("rsp");

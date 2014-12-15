@@ -3,13 +3,16 @@
 #include "Scheduler.h"
 #include <stdlib.h>
 
+#ifdef CORO_DEBUG
 Worker *all_coros = NULL;
 
 size_t total_coros = 0;
+#endif
 
 int32_t stack_offset = 64;
 size_t current_stack_offset = 0;
 
+#ifdef CORO_DEBUG
 void insert_coro(Worker *c) {
 	if (all_coros) {
 		all_coros->tracking_prev = c;
@@ -26,6 +29,7 @@ void remove_coro(Worker *c) {
 		c->tracking_next->tracking_prev = c->tracking_prev;
 	}
 }
+#endif
 
 Worker *convert_to_master(Worker *me) {
 	if (!me) {
@@ -43,11 +47,13 @@ Worker *convert_to_master(Worker *me) {
 	me->base = NULL;
 	me->stack = NULL;
 
+#ifdef CORO_DEBUG
 	me->tracking_prev = NULL;
 	me->tracking_next = NULL;
 
 	total_coros++;
 	insert_coro(me);
+#endif
 	me->sched = NULL;
 	me->next = NULL;
 	me->id = 0;
@@ -75,15 +81,19 @@ void coro_spawn(Worker *me, Worker *c, coro_func f, size_t ssize) {
 	current_stack_offset += stack_offset;
 	current_stack_offset &= ((cache_line_size * num_offsets) - 1);
 
+#ifdef CORO_DEBUG
 	c->tracking_prev = NULL;
 	c->tracking_next = NULL;
+#endif
 
 	memset(c->base, 0, ssize);
 
 	makestack(&(me->stack), &(c->stack), f, c);
 
+#ifdef CORO_DEBUG
 	insert_coro(c);
 	total_coros++;
+#endif
 }
 
 Worker *worker_spawn(Worker *me, Scheduler *sched, thread_func f, void *arg) {
@@ -109,9 +119,13 @@ Worker *worker_spawn(Worker *me, Scheduler *sched, thread_func f, void *arg) {
 }
 
 void destroy_coro(Worker *c) {
+#ifdef CORO_DEBUG
 	total_coros--;
+#endif
 	if (c->base != NULL) {
+#ifdef CORO_DEBUG
 		remove_coro(c);
+#endif
 		free(c->base);
 	}
 }

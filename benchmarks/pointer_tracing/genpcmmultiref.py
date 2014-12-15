@@ -26,6 +26,8 @@ outputContent='''
 
 #include <sched.h>
 
+#include "customcounters.h"
+
 int TOTAL_LISTS = '''
 outputContent+=listNum
 outputContent+=''';
@@ -142,6 +144,9 @@ int main(int argc, char** argv)
 	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
 		std::cerr << "could not set CPU affinity in main thread " << std::endl;
 	}
+        if (customPcmInit() < 0) {
+            return -1;
+        }
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
     allList = (List**)malloc(TOTAL_LISTS*sizeof(List*));
@@ -159,6 +164,7 @@ int main(int argc, char** argv)
 	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
 	gettimeofday(&start, NULL);
+        CoreCounterState before = getCoreCounterState(processorid);
 	for (int i = 0; i < TOTAL_LISTS; i+='''
 outputContent+=concurrency
 outputContent+=''') {'''
@@ -185,16 +191,18 @@ for i in range(int(concurrency)):
 outputContent+='''
             }
         }
+        CoreCounterState after = getCoreCounterState(processorid);
 	gettimeofday(&end, NULL);
 	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cout << "traverse duration " << duration << " s" << std::endl;
 	std::cerr << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times << std::endl;
+        customPcmPrint(before, after, duration);
 
 	destroyList();
 
 	return 0;
 }'''
-fileHandle = open('multiref_source.cpp', 'w')
+fileHandle = open('pcm_multiref_source.cpp', 'w')
 
 fileHandle.write(outputContent);
 

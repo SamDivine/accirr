@@ -14,16 +14,18 @@ int customPcmInit() {
 #define SETEVENT(idx, name) \
 	mEvents[idx].event_number = name##_EVTNR;\
 	mEvents[idx].umask_value = name##_UMASK;
-/* L2 Hit and L3 Hit 
+/* L2 Hit and L3 Hit */
 	SETEVENT(0, ARCH_LLC_MISS);
 	SETEVENT(1, MEM_LOAD_UOPS_LLC_HIT_RETIRED_XSNP_NONE);
 	SETEVENT(2, MEM_LOAD_UOPS_LLC_HIT_RETIRED_XSNP);
 	SETEVENT(3, MEM_LOAD_UOPS_RETIRED_L2_HIT);
-*/
+
+/*
 	SETEVENT(0, ARCH_LLC_REFERENCE);
 	SETEVENT(1, ARCH_INST_RETIRED);
 	SETEVENT(2, DTLB_LOAD_MISS_CAUSE_WALK);
 	SETEVENT(3, UOPS_RETIRED_ALL);
+*/
 #undef SETEVENT
 
 	if (m->good()) {
@@ -42,7 +44,7 @@ void customPcmPrint(CounterStateType& before, CounterStateType& after, double du
 	for (int i = 0; i < 4; i++) {
 		mCounts[i] = getNumberOfCustomEvents(i, before, after);
 	}
-/* L2 Hit and L3 Hit 
+/* L2 Hit and L3 Hit */
 	double l3Miss = mCounts[0];
 	double l3UnsharedHit = mCounts[1];
 	double l2HitM = mCounts[2];
@@ -53,17 +55,18 @@ void customPcmPrint(CounterStateType& before, CounterStateType& after, double du
 	double l2Load = l3Load+l2Hit;
 	double l2HitRatio = l2Hit/l2Load;
 	double l3HitRatio = l3Hit/l3Load;
-	fprintf(stdout, "l3hit load hitratio %e %e %e l2hit load hitratio %e %e %e\n", l3Hit, l3Load, l3HitRatio, l2Hit, l2Load, l2HitRatio);
-	fprintf(stderr, "l3hit load hitratio %e %e %e l2hit load hitratio %e %e %e\n", l3Hit, l3Load, l3HitRatio, l2Hit, l2Load, l2HitRatio);
-*/
+	fprintf(stdout, "l3hit load hitratio %g %g %g l2hit load hitratio %g %g %g\n", l3Hit, l3Load, l3HitRatio, l2Hit, l2Load, l2HitRatio);
+	fprintf(stderr, "l3hit load hitratio %g %g %g l2hit load hitratio %g %g %g\n", l3Hit, l3Load, l3HitRatio, l2Hit, l2Load, l2HitRatio);
+/*
 	double llcRef = mCounts[0];
 	double instRetired = mCounts[1];
 	double tlbLoadMiss = mCounts[2];
 	double uopsRetired = mCounts[3];
 
 	double tlbLoadMissPerSec = tlbLoadMiss/duration;
-	fprintf(stdout, "llcRef %e instRetired %e tlbLoadMissPerSec %e uopsRetired %e\n", llcRef, instRetired, tlbLoadMissPerSec, uopsRetired);
-	fprintf(stderr, "llcRef %e instRetired %e tlbLoadMissPerSec %e uopsRetired %e\n", llcRef, instRetired, tlbLoadMissPerSec, uopsRetired);
+	fprintf(stdout, "llcRef %g instRetired %g tlbLoadMissPerSec %g uopsRetired %g\n", llcRef, instRetired, tlbLoadMissPerSec, uopsRetired);
+	fprintf(stderr, "llcRef %g instRetired %g tlbLoadMissPerSec %g uopsRetired %g\n", llcRef, instRetired, tlbLoadMissPerSec, uopsRetired);
+*/
 
 }
 
