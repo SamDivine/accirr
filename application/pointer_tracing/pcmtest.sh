@@ -8,8 +8,8 @@ LOCALITY="0 1 2 3"
 #OUTPUTHUGEPAGE="pcm_test_only_worker_prefetch3_hugepage.txt"
 #OUTPUTNORMAL="pcm_test_output_without_worker_stack_prefetch_normal.txt"
 #OUTPUTHUGEPAGE="pcm_test_output_without_worker_stack_prefetch_hugepage.txt"
-OUTPUTNORMAL="pcm_test_worker_stack1_prefetch33_normal.txt"
-OUTPUTHUGEPAGE="pcm_test_worker_stack1_prefetch33_hugepage.txt"
+OUTPUTNORMAL="pcm_test_worker_stack1_prefetch03_normal.txt"
+OUTPUTHUGEPAGE="pcm_test_worker_stack1_prefetch03_hugepage.txt"
 
 STARTTIME=`date`
 

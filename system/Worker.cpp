@@ -113,8 +113,6 @@ Worker *worker_spawn(Worker *me, Scheduler *sched, thread_func f, void *arg) {
 	coro_invoke(me, thr, (void*)f);
 	coro_invoke(me, thr, (void*)arg);
 
-	//std::cerr << "arg=" << (intptr_t)arg << std::endl;
-
 	return thr;
 }
 
