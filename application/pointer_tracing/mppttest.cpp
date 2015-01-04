@@ -55,7 +55,6 @@ void insertToListI(int i, List* l) {
 		allList[i]->next = l;
 	}
 	allList[i] = l;
-	//allList[i]->next = head[i];
 	allList[i]->next = NULL;
 }
 
@@ -86,18 +85,15 @@ void buildList() {
 			tofillLists--;
 		}
 	}
-	//
 	for (int i = 0; i < TOTAL_LISTS; i++) {
 		allList[i] = head[i];
 	}
 }
 
 void tracingTask(Worker *me, void *arg) {
-	// TODO: arg parse
 	int listsPerCoro = TOTAL_LISTS/CORO_NUM;
 	int remainder = TOTAL_LISTS%CORO_NUM;
 	intptr_t idx = (intptr_t)arg;
-	//std::cerr << "coro " << idx << " start" << std::endl;
 	int mListIdx = idx*listsPerCoro + (idx>=remainder ? remainder : idx);
 	int nextListIdx = mListIdx + listsPerCoro + (idx>=remainder ? 0 : 1);
 	List* localList;
@@ -107,7 +103,6 @@ void tracingTask(Worker *me, void *arg) {
 	// TODO: tracing
 	for (int i = 0; i < REPEAT_TIMES; i++) {
 		for (int j = mListIdx; j < nextListIdx; j++) {
-			//std::cerr << "list " << j << " start" << std::endl;
 			localList = head[j];
 			while (localList != NULL) {
 #ifdef DATA_PREFETCH
@@ -120,13 +115,11 @@ void tracingTask(Worker *me, void *arg) {
 				times++;
 				localList = localList->next;
 			} 
-			//std::cerr << "list " << j << " end" << std::endl;
 		}
 	}
 	//
 	total_accum += accum;
 	tra_times += times;
-	//std::cerr << "coro " << idx << " end" << std::endl;
 }
 
 void destroyList() {
@@ -167,7 +160,7 @@ int main(int argc, char** argv)
     case 6:
         LIST_LEN = (1<<atoi(argv[5]));
     case 5:
-        TOTAL_LISTS = atoi(argv[4]);
+        TOTAL_LISTS = (1<<atoi(argv[4]));
 	case 4:
 		REPEAT_TIMES = atoi(argv[3]);
 	case 3:
@@ -209,7 +202,6 @@ int main(int argc, char** argv)
 	gettimeofday(&end, NULL);
 	long duration = 1000000*(end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec);
 	std::cerr << "build duration = " << duration << std::endl;
-	//getchar();
 	for (intptr_t i = 0; i < CORO_NUM; i++) {
 		createTask(tracingTask, (void*)i);
 	}
@@ -218,6 +210,7 @@ int main(int argc, char** argv)
 	AccirrFinalize();
 	gettimeofday(&end, NULL);
 	duration = 1000000*(end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec);
+
 	std::ofstream fout;
 	char filename[32];
 	sprintf(filename, "mppttest_%d_%d_%d.log", CORO_NUM, PROC_NUM, processid);
