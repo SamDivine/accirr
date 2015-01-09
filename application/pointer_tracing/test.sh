@@ -1,32 +1,43 @@
 #!/bin/bash
 
-COROS="8 16 32 64 128 256 512 1024"
-REPEAT=1
+COROS=32
 MODE="0 1"
 LOCALITY="0 1 2 3"
 
-OUTPUT="accirr_pttest.csv"
+OUTPUTNORMAL="accirr_pttest_east.tk.csv"
+OUTPUTHUGEPAGE="accirr_pttest_hugepage_east.tk.csv"
 
-if [ -e $OUTPUT ]; then
-	rm $OUTPUT
+if [ -e $OUTPUTNORMAL ]; then
+	rm $OUTPUTNORMAL
 fi
 
-for i in $COROS; do
+if [ -e $OUTPUTHUGEPAGE ]; then
+	rm $OUTPUTHUGEPAGE
+fi
+
+for k in $(seq $COROS); do
+	let "i=k*8"
 	RST=$RST","$i
 done
 
-echo $RST >> $OUTPUT
+echo $RST >> $OUTPUTNORMAL
+echo $RST >> $OUTPUTHUGEPAGE
 
 for i in $MODE; do
 	for j in $LOCALITY; do
-		RST="m"$i"l"$j
+		RSTN="m"$i"l"$j
+		RSTH="m"$i"l"$j
 		./gen.sh $i $j
-		for k in $COROS; do
-			echo run pttest with $k coro, mode $i, locality $j
-			RST=$RST","`./pttest $k $REPEAT | awk '{time=$3} { printf("%.2f", time);}'`
-			sleep 10
+		for c in $(seq $COROS); do
+			let "k=c*8"
+			echo run pttest with $k coro, mode $i, locality $j normal
+			RSTN=$RSTN","`./pttest $k | awk '{time=$3} { printf("%.2f", time);}'`
+			echo run pttest with $k coro, mode $i, locality $j hugepage
+			RSTH=$RSTH","`LD_PRELOAD=../../lib/libhugetlbfs.so HUGETLB_MORECORE=1g ./pttest $k | awk '{time=$3} { printf("%.2f", time);}'`
+			sleep 5
 		done
-		echo $RST >> $OUTPUT
+		echo $RSTN >> $OUTPUTNORMAL
+		echo $RSTH >> $OUTPUTHUGEPAGE
 	done
 done
 

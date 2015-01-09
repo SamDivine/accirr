@@ -9,7 +9,7 @@
 int CORO_NUM = 2;
 int PROC_NUM = 1;
 int TOTAL_LISTS = (1<<11);
-int LIST_LEN = (1<<14);
+int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
 int processid = 0;
 
@@ -179,9 +179,15 @@ int main(int argc, char** argv)
 			processid++;
 		}
 	}
+	int halfcore = syscpu/2;
+	int quartercore = syscpu/4;
+	int offset = processid%syscpu;
+	int halfoffset = offset%halfcore;
+//	int bindid = (offset<halfcore ? 0 : halfcore) + halfoffset/2 + (halfoffset%2==0 ? 0 : quartercore);
+	int bindid = processid;
 	cpu_set_t mask;
 	CPU_ZERO(&mask);
-	CPU_SET(processid%syscpu, &mask);
+	CPU_SET(bindid, &mask);
 	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
 		std::cerr << "could not set CPU affinity in process " << processid << std::endl;
 	}
