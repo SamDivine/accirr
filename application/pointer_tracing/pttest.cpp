@@ -101,14 +101,14 @@ void tracingTask(Worker *me, void *arg) {
 	int64_t accum = 0;
 	int64_t times = 0;
 	// TODO: tracing
-	for (int i = 0; i < REPEAT_TIMES; i++) {
-		for (int j = mListIdx; j < nextListIdx; j++) {
-			localList = head[j];
-			while (localList != NULL) {
+	for (int j = mListIdx; j < nextListIdx; j++) {
+		localList = head[j];
+		while (localList != NULL) {
 #ifdef DATA_PREFETCH
-				__builtin_prefetch(localList, PREFETCH_MODE, PREFETCH_LOCALITY);
-				yield();
+			__builtin_prefetch(localList, PREFETCH_MODE, PREFETCH_LOCALITY);
+			yield();
 #endif
+			for (int i = 0; i < REPEAT_TIMES; i++) {
 				for (int k = 0; k < LOCAL_NUM; k++) {
 					accum += localList->data[k];
 				}
@@ -127,9 +127,9 @@ void tracingTask(Worker *me, void *arg) {
 				accum += localList->data[12];
 				accum += localList->data[13];
 				*/
-				times++;
-				localList = localList->next;
 			} 
+			times++;
+			localList = localList->next;
 		}
 	}
 	total_accum += accum;
