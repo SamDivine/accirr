@@ -197,8 +197,8 @@ int main(int argc, char** argv)
 	int quartercore = syscpu/4;
 	int offset = processid%syscpu;
 	int halfoffset = offset%halfcore;
-	int bindid = (offset<halfcore ? 0 : halfcore) + halfoffset/2 + (halfoffset%2==0 ? 0 : quartercore);//diff socket first
-	//int bindid = offset;//same socket diff core first
+	//int bindid = (offset<halfcore ? 0 : halfcore) + halfoffset/2 + (halfoffset%2==0 ? 0 : quartercore);//diff socket first
+	int bindid = offset;//same socket diff core first
 	bindProc(bindid);
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
