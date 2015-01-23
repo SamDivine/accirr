@@ -154,6 +154,17 @@ void destroyList() {
 #endif
 }
 
+int bindProc(int bindid) {
+	cpu_set_t mask;
+	CPU_ZERO(&mask);
+	CPU_SET(bindid, &mask);
+	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
+		std::cerr << "could not set CPU affinity in process " << processid << std::endl;
+		return -1;
+	}
+	return 0;
+}
+
 int main(int argc, char** argv)
 {
     switch(argc) {
@@ -183,14 +194,10 @@ int main(int argc, char** argv)
 	int quartercore = syscpu/4;
 	int offset = processid%syscpu;
 	int halfoffset = offset%halfcore;
-//	int bindid = (offset<halfcore ? 0 : halfcore) + halfoffset/2 + (halfoffset%2==0 ? 0 : quartercore);
-	int bindid = processid;
-	cpu_set_t mask;
-	CPU_ZERO(&mask);
-	CPU_SET(bindid, &mask);
-	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
-		std::cerr << "could not set CPU affinity in process " << processid << std::endl;
-	}
+	int bindid = (offset<halfcore ? 0 : halfcore) + halfoffset/2 + (halfoffset%2==0 ? 0 : quartercore);//diff socket
+	//int bindid = offset;//same socket diff core
+	//int bindid = offset/2 + (offset%2)*halfcore;//same socket same core
+	bindProc(bindid);
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
     allList = (List**)malloc(TOTAL_LISTS*sizeof(List*));
@@ -202,12 +209,12 @@ int main(int argc, char** argv)
 	listsLen = new int[TOTAL_LISTS];
 	listNumber = new int[TOTAL_LISTS];
 #endif
-	AccirrInit(&argc, &argv);
 	gettimeofday(&start, NULL);
 	buildList();
 	gettimeofday(&end, NULL);
 	long duration = 1000000*(end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec);
 	std::cerr << "build duration = " << duration << std::endl;
+	AccirrInit(&argc, &argv);
 	for (intptr_t i = 0; i < CORO_NUM; i++) {
 		createTask(tracingTask, (void*)i);
 	}

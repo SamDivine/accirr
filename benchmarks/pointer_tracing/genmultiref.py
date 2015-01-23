@@ -132,16 +132,23 @@ void destroyList() {
 #endif
 }
 
+int bindProc(int bindid) {
+	cpu_set_t mask;
+	CPU_ZERO(&mask);
+	CPU_SET(bindid, &mask);
+	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
+		std::cerr << "could not set CPU affinity in main thread " << std::endl;
+                return -1;
+	}
+        return 0;
+}
+
 int main(int argc, char** argv)
 {
 	int syscpu = sysconf(_SC_NPROCESSORS_CONF);
-	int processorid = 0;
-	cpu_set_t mask;
-	CPU_ZERO(&mask);
-	CPU_SET(processorid, &mask);
-	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
-		std::cerr << "could not set CPU affinity in main thread " << std::endl;
-	}
+        int quarterCore = syscpu/4;
+	int bindid = quarterCore;
+        bindProc(0);
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
     allList = (List**)malloc(TOTAL_LISTS*sizeof(List*));
@@ -158,6 +165,7 @@ int main(int argc, char** argv)
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
+        //bindProc(0);
 	gettimeofday(&start, NULL);
 	for (int i = 0; i < TOTAL_LISTS; i+='''
 outputContent+=concurrency
@@ -173,15 +181,31 @@ outputContent+='''
                 if (allList[i] == NULL) {
                     break;
                 }'''
+
 for i in range(int(concurrency)):
     offset = bytes(i)
+    outputContent+=('''
+                allList[i+'''+offset+'''] = allList[i+'''+offset+''']->next;''')
+outputContent+='''
+                if (allList[i] == NULL) {
+                    break;
+                }'''
+
+
+"""
     for j in range(LOCAL_NUM):
         joffset = bytes(j)
         outputContent+=('''
                 total_accum += allList[i+'''+offset+''']->data['''+joffset+'''];''')
+                allList[i+'''+offset+'''] = allList[i+'''+offset+''']->next;
+"""
+for i in range(int(concurrency)):
+    offset = bytes(i)
     outputContent+=('''
-                tra_times++;
-                allList[i+'''+offset+'''] = allList[i+'''+offset+''']->next;''')
+                for (int k = 0; k < LOCAL_NUM; k++) {
+                    total_accum += allList[i+'''+offset+''']->data[k];
+                }
+                tra_times++;''')
 outputContent+='''
             }
         }

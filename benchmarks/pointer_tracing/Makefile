@@ -9,7 +9,7 @@ vpath %.cpp $(ACCIRR_HOME)/third_party/intelpcm
 
 CXXFLAGS += -O2 -I$(PCM_DIR) -fopenmp -pthread -lrt -DUSING_MALLOC
 
-TARGET=pointer_tracing old_pointer_tracing pttest pcm_pttest multiref_compiler multiref_source pcm_multiref_compiler pcm_multiref_source
+TARGET=pointer_tracing old_pointer_tracing pttest pcm_pttest multiref_compiler multiref_source pcm_multiref_compiler pcm_multiref_source mpmultiref_source
 
 all: $(TARGET)
 

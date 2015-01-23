@@ -150,7 +150,7 @@ int main(int argc, char** argv)
     case 5:
         LIST_LEN = (1<<atoi(argv[4]));
     case 4:
-        TOTAL_LISTS = atoi(argv[3]);
+        TOTAL_LISTS = (1<<atoi(argv[3]));
 	case 3:
 		REPEAT_TIMES = atoi(argv[2]);
 	case 2:

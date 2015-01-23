@@ -112,6 +112,21 @@ void tracingTask(Worker *me, void *arg) {
 				for (int k = 0; k < LOCAL_NUM; k++) {
 					accum += localList->data[k];
 				}
+				/*accum += localList->data[0];
+				accum += localList->data[1];
+				accum += localList->data[2];
+				accum += localList->data[3];
+				accum += localList->data[4];
+				accum += localList->data[5];
+				accum += localList->data[6];
+				accum += localList->data[7];
+				accum += localList->data[8];
+				accum += localList->data[9];
+				accum += localList->data[10];
+				accum += localList->data[11];
+				accum += localList->data[12];
+				accum += localList->data[13];
+				*/
 				times++;
 				localList = localList->next;
 			} 
@@ -153,6 +168,17 @@ void destroyList() {
 #endif
 }
 
+int bindProc(int bindid) {
+	cpu_set_t mask;
+	CPU_ZERO(&mask);
+	CPU_SET(bindid, &mask);
+	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
+		std::cerr << "could not set CPU affinity in main thread " << std::endl;
+		return -1;
+	}
+	return 0;
+}
+
 int main(int argc, char** argv)
 {
     switch(argc) {
@@ -169,13 +195,10 @@ int main(int argc, char** argv)
         break;
     }
 	int syscpu = sysconf(_SC_NPROCESSORS_CONF);
-	int processorid = 0;
-	cpu_set_t mask;
-	CPU_ZERO(&mask);
-	CPU_SET(processorid, &mask);
-	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
-		std::cerr << "could not set CPU affinity in main thread " << std::endl;
-	}
+	int quarterCore = syscpu/4;
+	int bindid = quarterCore;
+	//bindProc(bindid);
+	bindProc(0);
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
     allList = (List**)malloc(TOTAL_LISTS*sizeof(List*));
@@ -192,11 +215,11 @@ int main(int argc, char** argv)
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
-	//getchar();
 	AccirrInit(&argc, &argv);
 	for (intptr_t i = 0; i < CORO_NUM; i++) {
 		createTask(tracingTask, (void*)i);
 	}
+	//bindProc(0);
 	gettimeofday(&start, NULL);
 	AccirrRun();
 	AccirrFinalize();
