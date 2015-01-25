@@ -19,7 +19,7 @@ int REPEAT_TIMES = 1;
 #endif
 
 #ifndef LOCAL_NUM
-#define LOCAL_NUM 14
+#define LOCAL_NUM 62
 #endif
 
 int64_t total_accum = 0;
