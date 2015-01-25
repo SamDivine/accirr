@@ -19,7 +19,7 @@ int REPEAT_TIMES = 1;
 #endif
 
 #ifndef LOCAL_NUM
-#define LOCAL_NUM 14
+#define LOCAL_NUM 30
 #endif
 
 int64_t total_accum = 0;
@@ -106,6 +106,7 @@ void tracingTask(Worker *me, void *arg) {
 		while (localList != NULL) {
 #ifdef DATA_PREFETCH
 			__builtin_prefetch(localList, PREFETCH_MODE, PREFETCH_LOCALITY);
+			__builtin_prefetch((char*)(localList)+64, PREFETCH_MODE, PREFETCH_LOCALITY);
 			yield();
 #endif
 			for (int i = 0; i < REPEAT_TIMES; i++) {

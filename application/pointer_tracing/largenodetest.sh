@@ -5,10 +5,9 @@ MODE="1"
 LOCALITY="2"
 
 GAPS="1 8 64"
-ALINES="0 1 2 3"
+alines=1
 
 for gap in $GAPS; do
-for alines in $ALINES; do
 
 OUTPUTHUGEPAGE="loads_alines${alines}_gap${gap}.txt"
 
@@ -19,7 +18,7 @@ fi
 for i in $MODE; do
 	for j in $LOCALITY; do
 		RSTH="m"$i"l"$j
-		./genloads.sh $i $j $alines
+		./gen.sh $i $j 
 		echo $RSTH >> $OUTPUTHUGEPAGE
 		for c in $(seq $COROS); do
 			let "k=c*gap"
@@ -31,5 +30,4 @@ for i in $MODE; do
 	done
 done
 
-done
 done
