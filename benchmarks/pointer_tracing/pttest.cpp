@@ -8,7 +8,7 @@
 #include <sched.h>
 
 int THREAD_NUM = 2;
-int TOTAL_LISTS = (1<<11);
+int TOTAL_LISTS = (1<<12);
 int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
 
@@ -106,7 +106,6 @@ void tracingTask(int idx) {
 			} 
 		}
 	}
-	//
 	total_accum += accum;
 	tra_times += times;
 }
@@ -170,9 +169,8 @@ int main(int argc, char** argv)
         break;
     }
 	int syscpu = sysconf(_SC_NPROCESSORS_CONF);
+	int halfcore = syscpu/2;
 	int quarterCore = syscpu/4;
-	int bindid = quarterCore;
-	//bindProc(bindid);
 	bindProc(0);
 
 	omp_set_num_threads(THREAD_NUM);
@@ -195,7 +193,11 @@ int main(int argc, char** argv)
 	gettimeofday(&start, NULL);
 #pragma omp parallel for
 	for (int i = 0; i < THREAD_NUM; i++) {
-		bindProc(0);
+		int offset = i%syscpu;
+		int halfoffset = offset%halfcore;
+		//int bindid = (offset<halfcore ? 0 : halfcore) + halfoffset/2+(halfoffset%2==0 ? 0 : quarterCore);//diff socket first
+		int bindid = offset;//same socket diff core first
+		bindProc(bindid);
 		tracingTask(i);
 	}
 	gettimeofday(&end, NULL);

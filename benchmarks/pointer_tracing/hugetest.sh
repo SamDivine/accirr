@@ -1,32 +1,33 @@
 #!/bin/bash
 
-THREADS="8 16 32 64 128 256 512 1024"
-REPEAT=1
+THREADS=32
 
-OUTPUT="omp_pttest_hugepage.csv"
-#OUTPUT="omp_newpttest_hugepage.csv"
-
+OUTPUT="multithread_samesocket.csv"
+TMPFILE="tmp.txt"
 if [ -e $OUTPUT ]; then
 	rm $OUTPUT
+fi
+if [ -e $TMPFILE ]; then
+	rm $TMPFILE
 fi
 
 make clean
 
 make
 
-for i in $THREADS; do
-	RST=$RST","$i
+for t in $(seq $THREADS); do
+	echo run pttest with $t threads
+	LD_PRELOAD=../../lib/libhugetlbfs.so HUGETLB_MORECORE=1g ./pttest $t >> $TMPFILE
+	sleep 5
+done
+
+for t in $(seq $THREADS); do
+	RST=$RST","$t
 done
 
 echo $RST >> $OUTPUT
 
-RST="rst"
-	for i in $THREADS; do
-		echo run pttest with $i threads
-		RST=$RST","`LD_PRELOAD=../../lib/libhugetlbfs.so HUGETLB_MORECORE=1g ./pttest $i $REPEAT | awk '{time=$3} {printf("%.2f", time);}'`
-#echo run newpttest with $i togethers
-#RST=$RST","`LD_PRELOAD=../../lib/libhugetlbfs.so HUGETLB_MORECORE=1g ./newpttest $i $REPEAT | awk '{time=$3} {printf("%.2f", time);}'`
-		sleep 10
-	done
-	echo $RST >> $OUTPUT
+RST="multithread"`awk 'BEGIN {str=""} {str=sprintf("%s,%.2f", str, $3)} END{print str}' $TMPFILE`
+
+echo $RST >> $OUTPUT
 
