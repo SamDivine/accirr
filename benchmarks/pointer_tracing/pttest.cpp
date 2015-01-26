@@ -94,16 +94,16 @@ void tracingTask(int idx) {
 	int64_t accum = 0;
 	int64_t times = 0;
 	// TODO: tracing
-	for (int i = 0; i < REPEAT_TIMES; i++) {
-		for (int j = mListIdx; j < nextListIdx; j++) {
-			localList = head[j];
-			while (localList != NULL) {
+	for (int j = mListIdx; j < nextListIdx; j++) {
+		localList = head[j];
+		while (localList != NULL) {
+			for (int i = 0; i < REPEAT_TIMES; i++) {
 				for (int k = 0; k < LOCAL_NUM; k++) {
 					accum += localList->data[k];
 				}
-				times++;
-				localList = localList->next;
-			} 
+			}
+			times++;
+			localList = localList->next;
 		}
 	}
 	total_accum += accum;
