@@ -7,7 +7,7 @@
 
 #include <sched.h>
 
-int THREAD_NUM = 2;
+int THREAD_NUM = 1;
 int TOTAL_LISTS = (1<<11);
 int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
@@ -94,16 +94,16 @@ void tracingTask(int idx) {
 	int64_t accum = 0;
 	int64_t times = 0;
 	// TODO: tracing
-	for (int i = 0; i < REPEAT_TIMES; i++) {
-		for (int j = mListIdx; j < nextListIdx; j++) {
-			localList = head[j];
-			while (localList != NULL) {
+	for (int j = mListIdx; j < nextListIdx; j++) {
+		localList = head[j];
+		while (localList != NULL) {
+			for (int i = 0; i < REPEAT_TIMES; i++) {
 				for (int k = 0; k < LOCAL_NUM; k++) {
 					accum += localList->data[k];
 				}
-				times++;
-				localList = localList->next;
-			} 
+			}
+			times++;
+			localList = localList->next;
 		}
 	}
 	//

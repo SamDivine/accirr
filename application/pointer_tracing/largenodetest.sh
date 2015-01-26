@@ -5,7 +5,7 @@ MODE="1"
 LOCALITY="2"
 
 GAPS="1 8 64"
-alines=1
+alines=0
 
 for gap in $GAPS; do
 
