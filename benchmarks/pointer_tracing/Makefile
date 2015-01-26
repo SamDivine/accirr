@@ -1,6 +1,6 @@
 CXX=g++
 
-ACCIRR_HOME := /home/localhost/accirr
+ACCIRR_HOME := /home/hp/accirr
 
 PCM_DIR := $(ACCIRR_HOME)/third_party/intelpcm
 PCM_DEPEND += cpucounters.cpp client_bw.cpp pci.cpp msr.cpp utils.cpp
