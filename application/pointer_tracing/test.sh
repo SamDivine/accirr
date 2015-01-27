@@ -7,7 +7,7 @@ GAP="1 8 64"
 
 for gap in $GAP; do
 
-OUTPUTHUGEPAGE="hugepage_4GB_gap${gap}.txt"
+OUTPUTHUGEPAGE="hugepage_remoteref_gap${gap}.txt"
 
 if [ -e $OUTPUTHUGEPAGE ]; then
 	rm $OUTPUTHUGEPAGE
