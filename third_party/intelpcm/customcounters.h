@@ -55,8 +55,8 @@ void customPcmPrint(CounterStateType& before, CounterStateType& after, double du
 	double l2Load = l3Load+l2Hit;
 	double l2HitRatio = l2Hit/l2Load;
 	double l3HitRatio = l3Hit/l3Load;
-	fprintf(stdout, "l3hit load hitratio %g %g %g l2hit load hitratio %g %g %g\n", l3Hit, l3Load, l3HitRatio, l2Hit, l2Load, l2HitRatio);
-	fprintf(stderr, "l3hit load hitratio %g %g %g l2hit load hitratio %g %g %g\n", l3Hit, l3Load, l3HitRatio, l2Hit, l2Load, l2HitRatio);
+	fprintf(stdout, "l3hit load hitratio %f %f %f l2hit load hitratio %f %f %f\n", l3Hit, l3Load, l3HitRatio, l2Hit, l2Load, l2HitRatio);
+	fprintf(stderr, "l3hit load hitratio %f %f %f l2hit load hitratio %f %f %f\n", l3Hit, l3Load, l3HitRatio, l2Hit, l2Load, l2HitRatio);
 /*
 	double llcRef = mCounts[0];
 	double instRetired = mCounts[1];
@@ -64,8 +64,8 @@ void customPcmPrint(CounterStateType& before, CounterStateType& after, double du
 	double uopsRetired = mCounts[3];
 
 	double tlbLoadMissPerSec = tlbLoadMiss/duration;
-	fprintf(stdout, "llcRef %g instRetired %g tlbLoadMissPerSec %g uopsRetired %g\n", llcRef, instRetired, tlbLoadMissPerSec, uopsRetired);
-	fprintf(stderr, "llcRef %g instRetired %g tlbLoadMissPerSec %g uopsRetired %g\n", llcRef, instRetired, tlbLoadMissPerSec, uopsRetired);
+	fprintf(stdout, "llcRef %f instRetired %f tlbLoadMissPerSec %f uopsRetired %f\n", llcRef, instRetired, tlbLoadMissPerSec, uopsRetired);
+	fprintf(stderr, "llcRef %f instRetired %f tlbLoadMissPerSec %f uopsRetired %f\n", llcRef, instRetired, tlbLoadMissPerSec, uopsRetired);
 */
 
 }

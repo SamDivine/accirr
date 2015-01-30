@@ -197,8 +197,8 @@ int main(int argc, char** argv)
 	int syscpu = sysconf(_SC_NPROCESSORS_CONF);
 	int quarterCore = syscpu/4;
 	int bindid = quarterCore;
-	bindProc(bindid);
-	//bindProc(0);
+	//bindProc(bindid);
+	bindProc(0);
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
     allList = (List**)malloc(TOTAL_LISTS*sizeof(List*));
@@ -215,7 +215,7 @@ int main(int argc, char** argv)
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
-	bindProc(0);
+	//bindProc(0);
 	AccirrInit(&argc, &argv);
 	for (intptr_t i = 0; i < CORO_NUM; i++) {
 		createTask(tracingTask, (void*)i);

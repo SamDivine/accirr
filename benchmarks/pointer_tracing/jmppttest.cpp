@@ -130,8 +130,8 @@ void tracingTask() {
 				}
 			}
 			times++;
-			localList = localList->next;
 			__builtin_prefetch(localList->jp, MODE, LOCALITY);
+			localList = localList->next;
 		}
 	}
 	total_accum += accum;
@@ -216,8 +216,10 @@ int main(int argc, char** argv)
 	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
 	for (int i = 1; i <= JMP_DISTANCE; i++) {
-		gettimeofday(&start, NULL);
+		std::cerr << "jmp distance is " << i << std::endl;
 		setDistance(i);
+		std::cerr << "distance set finished" << std::endl;
+		gettimeofday(&start, NULL);
 		tracingTask();
 		gettimeofday(&end, NULL);
 		duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;

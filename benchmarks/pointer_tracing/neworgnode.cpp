@@ -1,25 +1,19 @@
-#include <Accirr.h>
 #include <sys/time.h>
+#include <iostream>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <omp.h>
 
 #include <sched.h>
 
-int CORO_NUM = 2;
+int THREAD_NUM = 2;
 int TOTAL_LISTS = (1<<11);
-int LIST_LEN = (1<<13);
+int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
 
-#ifndef PREFETCH_MODE
-#define PREFETCH_MODE 0
-#endif
-
-#ifndef PREFETCH_LOCALITY
-#define PREFETCH_LOCALITY 0
-#endif
-
 #ifndef LOCAL_NUM
-#define LOCAL_NUM 62
+#define LOCAL_NUM 14
 #endif
 
 int64_t total_accum = 0;
@@ -29,13 +23,25 @@ struct timeval start, end;
 
 class List {
 public:
-	int data[LOCAL_NUM];
+	int* data;
 	List* next;
 	List() : next(NULL) {
+#ifdef USING_MALLOC
+		data = (int*)malloc(LOCAL_NUM*sizeof(int));
+#else
+		data = new int[LOCAL_NUM];
+#endif
         for (int i = 0; i < LOCAL_NUM; i++) {
             data[i] = 0;
         }
     }
+	~List() {
+#ifdef USING_MALLOC
+		//free(data);
+#else
+		delete[] data;
+#endif
+	}
 };
 
 List** head;
@@ -70,6 +76,7 @@ void buildList() {
 		idx = rand()%tofillLists;
 #ifdef USING_MALLOC
 		List* tmp = (List*)malloc(sizeof(List));
+		new(tmp)List();
 #else
 		List* tmp = new List();
 #endif
@@ -89,11 +96,10 @@ void buildList() {
 	}
 }
 
-void tracingTask(Worker *me, void *arg) {
+void tracingTask(int idx) {
 	// TODO: arg parse
-	int listsPerCoro = TOTAL_LISTS/CORO_NUM;
-	int remainder = TOTAL_LISTS%CORO_NUM;
-	intptr_t idx = (intptr_t)arg;
+	int listsPerCoro = TOTAL_LISTS/THREAD_NUM;
+	int remainder = TOTAL_LISTS%THREAD_NUM;
 	int mListIdx = idx*listsPerCoro + (idx>=remainder ? remainder : idx);
 	int nextListIdx = mListIdx + listsPerCoro + (idx>=remainder ? 0 : 1);
 	List* localList;
@@ -104,33 +110,11 @@ void tracingTask(Worker *me, void *arg) {
 	for (int j = mListIdx; j < nextListIdx; j++) {
 		localList = head[j];
 		while (localList != NULL) {
-#ifdef DATA_PREFETCH
-			__builtin_prefetch(localList, PREFETCH_MODE, PREFETCH_LOCALITY);
-			__builtin_prefetch((char*)(localList)+64, PREFETCH_MODE, PREFETCH_LOCALITY);
-			__builtin_prefetch((char*)(localList)+128, PREFETCH_MODE, PREFETCH_LOCALITY);
-			__builtin_prefetch((char*)(localList)+192, PREFETCH_MODE, PREFETCH_LOCALITY);
-			yield();
-#endif
 			for (int i = 0; i < REPEAT_TIMES; i++) {
 				for (int k = 0; k < LOCAL_NUM; k++) {
 					accum += localList->data[k];
 				}
-				/*accum += localList->data[0];
-				accum += localList->data[1];
-				accum += localList->data[2];
-				accum += localList->data[3];
-				accum += localList->data[4];
-				accum += localList->data[5];
-				accum += localList->data[6];
-				accum += localList->data[7];
-				accum += localList->data[8];
-				accum += localList->data[9];
-				accum += localList->data[10];
-				accum += localList->data[11];
-				accum += localList->data[12];
-				accum += localList->data[13];
-				*/
-			} 
+			}
 			times++;
 			localList = localList->next;
 		}
@@ -156,6 +140,7 @@ void destroyList() {
 			tmp = listNode;
 			listNode = listNode->next;
 #ifdef USING_MALLOC
+			free(tmp->data);
 			free(tmp);
 #else
 			delete tmp;
@@ -192,16 +177,17 @@ int main(int argc, char** argv)
 	case 3:
 		REPEAT_TIMES = atoi(argv[2]);
 	case 2:
-		CORO_NUM = atoi(argv[1]);
+		THREAD_NUM = atoi(argv[1]);
         break;
     default:
         break;
     }
 	int syscpu = sysconf(_SC_NPROCESSORS_CONF);
+	int halfcore = syscpu/2;
 	int quarterCore = syscpu/4;
-	int bindid = quarterCore;
-	//bindProc(bindid);
 	bindProc(0);
+
+	omp_set_num_threads(THREAD_NUM);
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
     allList = (List**)malloc(TOTAL_LISTS*sizeof(List*));
@@ -218,14 +204,18 @@ int main(int argc, char** argv)
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
-	AccirrInit(&argc, &argv);
-	for (intptr_t i = 0; i < CORO_NUM; i++) {
-		createTask(tracingTask, (void*)i);
-	}
-	//bindProc(0);
 	gettimeofday(&start, NULL);
-	AccirrRun();
-	AccirrFinalize();
+#pragma omp parallel for
+	for (int i = 0; i < THREAD_NUM; i++) {
+/*		int offset = i%syscpu;
+		int halfoffset = offset%halfcore;
+		//int bindid = (offset<halfcore ? 0 : halfcore) + halfoffset/2+(halfoffset%2==0 ? 0 : quarterCore);//diff socket first
+		int bindid = offset;//same socket diff core first
+		bindProc(bindid);
+*/
+		bindProc(0);
+		tracingTask(i);
+	}
 	gettimeofday(&end, NULL);
 	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cout << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times << std::endl;

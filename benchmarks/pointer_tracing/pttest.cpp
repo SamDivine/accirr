@@ -8,7 +8,7 @@
 #include <sched.h>
 
 int THREAD_NUM = 2;
-int TOTAL_LISTS = (1<<12);
+int TOTAL_LISTS = (1<<11);
 int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
 

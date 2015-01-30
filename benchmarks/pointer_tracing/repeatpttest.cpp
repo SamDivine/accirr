@@ -172,8 +172,8 @@ int main(int argc, char** argv)
 	int halfcore = syscpu/2;
 	int quarterCore = syscpu/4;
 	int bindid = quarterCore;
-	bindProc(bindid);
-	//bindProc(0);
+	//bindProc(bindid);
+	bindProc(0);
 
 	omp_set_num_threads(THREAD_NUM);
 #ifdef USING_MALLOC
@@ -192,7 +192,7 @@ int main(int argc, char** argv)
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
-	bindProc(0);
+	//bindProc(0);
 	gettimeofday(&start, NULL);
 #pragma omp parallel for
 	for (int i = 0; i < THREAD_NUM; i++) {

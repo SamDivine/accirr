@@ -23,9 +23,7 @@ RST="rst"
 	for i in $TOGETHERS; do
 		echo run pttest with $i threads
 		RST=$RST","`./pttest $i $REPEAT | awk '{time=$3} {printf("%.2f", time);}'`
-#		echo run newpttest with $i togethers
-#		RST=$RST","`./newpttest $i $REPEAT | awk '{time=$3} {printf("%.2f", time);}'`
-		sleep 10
+		sleep 5
 	done
 	echo $RST >> $OUTPUT
 
