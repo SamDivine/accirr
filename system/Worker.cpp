@@ -35,6 +35,7 @@ Worker *convert_to_master(Worker *me) {
 	if (!me) {
 #ifdef USING_MALLOC
 		me = (Worker*)malloc(sizeof(Worker));
+		new(me)Worker();
 #else
 		me = new Worker();
 #endif
@@ -99,6 +100,7 @@ void coro_spawn(Worker *me, Worker *c, coro_func f, size_t ssize) {
 Worker *worker_spawn(Worker *me, Scheduler *sched, thread_func f, void *arg) {
 #ifdef USING_MALLOC
 	Worker *thr = (Worker*)malloc(sizeof(Worker));
+	new(thr)Worker();
 #else
 	Worker *thr = new Worker();
 #endif

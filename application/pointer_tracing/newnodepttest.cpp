@@ -2,16 +2,13 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <fstream>
 
 #include <sched.h>
 
 int CORO_NUM = 2;
-int PROC_NUM = 1;
-int TOTAL_LISTS = (1<<12);
+int TOTAL_LISTS = (1<<11);
 int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
-int processid = 0;
 
 #ifndef PREFETCH_MODE
 #define PREFETCH_MODE 0
@@ -32,13 +29,25 @@ struct timeval start, end;
 
 class List {
 public:
-	int data[LOCAL_NUM];
+	int* data;
 	List* next;
 	List() : next(NULL) {
+#ifdef USING_MALLOC
+		data = (int*)malloc(LOCAL_NUM*sizeof(int));
+#else
+		data = new int[LOCAL_NUM];
+#endif
         for (int i = 0; i < LOCAL_NUM; i++) {
             data[i] = 0;
         }
     }
+	~List() {
+#ifdef USING_MALLOC
+		//free(data);
+#else
+		delete[] data;
+#endif
+	}
 };
 
 List** head;
@@ -55,6 +64,7 @@ void insertToListI(int i, List* l) {
 		allList[i]->next = l;
 	}
 	allList[i] = l;
+	//allList[i]->next = head[i];
 	allList[i]->next = NULL;
 }
 
@@ -72,6 +82,7 @@ void buildList() {
 		idx = rand()%tofillLists;
 #ifdef USING_MALLOC
 		List* tmp = (List*)malloc(sizeof(List));
+		new(tmp)List();
 #else
 		List* tmp = new List();
 #endif
@@ -85,12 +96,14 @@ void buildList() {
 			tofillLists--;
 		}
 	}
+	//
 	for (int i = 0; i < TOTAL_LISTS; i++) {
 		allList[i] = head[i];
 	}
 }
 
 void tracingTask(Worker *me, void *arg) {
+	// TODO: arg parse
 	int listsPerCoro = TOTAL_LISTS/CORO_NUM;
 	int remainder = TOTAL_LISTS%CORO_NUM;
 	intptr_t idx = (intptr_t)arg;
@@ -101,23 +114,39 @@ void tracingTask(Worker *me, void *arg) {
 	int64_t accum = 0;
 	int64_t times = 0;
 	// TODO: tracing
-	for (int i = 0; i < REPEAT_TIMES; i++) {
-		for (int j = mListIdx; j < nextListIdx; j++) {
-			localList = head[j];
-			while (localList != NULL) {
+	for (int j = mListIdx; j < nextListIdx; j++) {
+		localList = head[j];
+		while (localList != NULL) {
 #ifdef DATA_PREFETCH
-				__builtin_prefetch(localList, PREFETCH_MODE, PREFETCH_LOCALITY);
-				yield();
+			//__builtin_prefetch(localList, PREFETCH_MODE, PREFETCH_LOCALITY);
+			//yield();
+			__builtin_prefetch(localList->data, PREFETCH_MODE, PREFETCH_LOCALITY);
+			yield();
 #endif
+			for (int i = 0; i < REPEAT_TIMES; i++) {
 				for (int k = 0; k < LOCAL_NUM; k++) {
 					accum += localList->data[k];
 				}
-				times++;
-				localList = localList->next;
+				/*accum += localList->data[0];
+				accum += localList->data[1];
+				accum += localList->data[2];
+				accum += localList->data[3];
+				accum += localList->data[4];
+				accum += localList->data[5];
+				accum += localList->data[6];
+				accum += localList->data[7];
+				accum += localList->data[8];
+				accum += localList->data[9];
+				accum += localList->data[10];
+				accum += localList->data[11];
+				accum += localList->data[12];
+				accum += localList->data[13];
+				*/
 			} 
+			times++;
+			localList = localList->next;
 		}
 	}
-	//
 	total_accum += accum;
 	tra_times += times;
 }
@@ -139,6 +168,7 @@ void destroyList() {
 			tmp = listNode;
 			listNode = listNode->next;
 #ifdef USING_MALLOC
+			free(tmp->data);
 			free(tmp);
 #else
 			delete tmp;
@@ -159,7 +189,7 @@ int bindProc(int bindid) {
 	CPU_ZERO(&mask);
 	CPU_SET(bindid, &mask);
 	if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {
-		std::cerr << "could not set CPU affinity in process " << processid << std::endl;
+		std::cerr << "could not set CPU affinity in main thread " << std::endl;
 		return -1;
 	}
 	return 0;
@@ -168,39 +198,23 @@ int bindProc(int bindid) {
 int main(int argc, char** argv)
 {
     switch(argc) {
-    case 6:
-        LIST_LEN = (1<<atoi(argv[5]));
     case 5:
-        TOTAL_LISTS = (1<<atoi(argv[4]));
-	case 4:
-		REPEAT_TIMES = atoi(argv[3]);
+        LIST_LEN = (1<<atoi(argv[4]));
+    case 4:
+        TOTAL_LISTS = (1<<atoi(argv[3]));
 	case 3:
-		PROC_NUM = atoi(argv[2]);
+		REPEAT_TIMES = atoi(argv[2]);
 	case 2:
 		CORO_NUM = atoi(argv[1]);
         break;
     default:
         break;
     }
-	
 	int syscpu = sysconf(_SC_NPROCESSORS_CONF);
-	while (processid < PROC_NUM-1) {
-		if (fork() == 0) {
-			break;
-		} else {
-			processid++;
-		}
-	}
-	int lenRemainder = LIST_LEN%PROC_NUM;
-	LIST_LEN = LIST_LEN/PROC_NUM + (processid<lenRemainder);
-	int halfcore = syscpu/2;
-	int quartercore = syscpu/4;
-	int offset = processid%syscpu;
-	int halfoffset = offset%halfcore;
-	//int bindid = (offset<halfcore ? 0 : halfcore) + halfoffset/2 + (halfoffset%2==0 ? 0 : quartercore);//diff socket first
-	//int bindid = offset;//same socket diff core first
-	int bindid = offset/2 + (offset%2)*halfcore;//same core first
-	bindProc(bindid);
+	int quarterCore = syscpu/4;
+	int bindid = quarterCore;
+	//bindProc(bindid);
+	bindProc(0);
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
     allList = (List**)malloc(TOTAL_LISTS*sizeof(List*));
@@ -215,8 +229,9 @@ int main(int argc, char** argv)
 	gettimeofday(&start, NULL);
 	buildList();
 	gettimeofday(&end, NULL);
-	long duration = 1000000*(end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec);
+	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
+	//bindProc(0);
 	AccirrInit(&argc, &argv);
 	for (intptr_t i = 0; i < CORO_NUM; i++) {
 		createTask(tracingTask, (void*)i);
@@ -225,15 +240,9 @@ int main(int argc, char** argv)
 	AccirrRun();
 	AccirrFinalize();
 	gettimeofday(&end, NULL);
-	duration = 1000000*(end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec);
-
-	std::ofstream fout;
-	char filename[32];
-	sprintf(filename, "mtpttest_%d_%d_%d.log", CORO_NUM, PROC_NUM, processid);
-	fout.open(filename);
-	fout << "traverse duration " << duration << " us accum " << total_accum << " traverse " << tra_times << std::endl;
-	std::cerr << "traverse duration " << duration << " us accum " << total_accum << " traverse " << tra_times << std::endl;
-	fout.close();
+	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
+	std::cout << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times << std::endl;
+	std::cerr << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times << std::endl;
 
 	destroyList();
 

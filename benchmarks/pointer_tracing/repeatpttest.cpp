@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <omp.h>
 
 #include <sched.h>
 
@@ -83,10 +82,11 @@ void buildList() {
 	}
 }
 
-void tracingTask(int idx) {
+void tracingTask() {
 	// TODO: arg parse
-	int listsPerCoro = TOTAL_LISTS/THREAD_NUM;
-	int remainder = TOTAL_LISTS%THREAD_NUM;
+	int listsPerCoro = TOTAL_LISTS;
+	int remainder = 0;
+	int idx = 0;
 	int mListIdx = idx*listsPerCoro + (idx>=remainder ? remainder : idx);
 	int nextListIdx = mListIdx + listsPerCoro + (idx>=remainder ? 0 : 1);
 	List* localList;
@@ -175,7 +175,6 @@ int main(int argc, char** argv)
 	//bindProc(bindid);
 	bindProc(0);
 
-	omp_set_num_threads(THREAD_NUM);
 #ifdef USING_MALLOC
     head = (List**)malloc(TOTAL_LISTS*sizeof(List*));
     allList = (List**)malloc(TOTAL_LISTS*sizeof(List*));
@@ -192,19 +191,8 @@ int main(int argc, char** argv)
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cerr << "build duration = " << duration << std::endl;
-	//bindProc(0);
 	gettimeofday(&start, NULL);
-#pragma omp parallel for
-	for (int i = 0; i < THREAD_NUM; i++) {
-/*		int offset = i%syscpu;
-		int halfoffset = offset%halfcore;
-		//int bindid = (offset<halfcore ? 0 : halfcore) + halfoffset/2+(halfoffset%2==0 ? 0 : quarterCore);//diff socket first
-		int bindid = offset;//same socket diff core first
-		bindProc(bindid);
-*/
-		bindProc(0);
-		tracingTask(i);
-	}
+	tracingTask();
 	gettimeofday(&end, NULL);
 	duration = (end.tv_sec-start.tv_sec) + (end.tv_usec-start.tv_usec)/1000000.0;
 	std::cout << "traverse duration " << duration << " s accum " << total_accum << " traverse " << tra_times << std::endl;

@@ -5,7 +5,7 @@ MODE="1"
 LOCALITY="2"
 
 GAPS="1 8 64"
-REPEATS="1"
+REPEATS="1 2 4 8 12 16"
 
 for gap in $GAPS; do
 for repeat in $REPEATS; do

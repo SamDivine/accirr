@@ -7,10 +7,6 @@ COROS=64
 PROCS=2
 GAP=64
 
-#OUTPUT1="accirr_mppttest_arithmatic_normal_east.tk.csv"
-#OUTPUT2="accirr_mppttest_harmonic_normal_east.tk.csv"
-#OUTPUT1="accirr_mppttest_arithmatic_hugepage_east.tk.csv"
-#OUTPUT2="accirr_mppttest_harmonic_hugepage_east.tk.csv"
 OUTPUT1="mppttest_arithmatic_hugepage_gap"${GAP}"_m"$MODE"l"$LOCALITY".csv"
 OUTPUT2="mppttest_harmonic_hugepage_gap"${GAP}"_m"$MODE"l"$LOCALITY".csv"
 
@@ -35,7 +31,6 @@ for c in $(seq $COROS); do
 #	for i in $(seq $PROCS); do
 	i=$PROCS
 		echo run mppttest with $k coros $i procs
-#		./mppttest $k $i 
 		LD_PRELOAD=../../lib/libhugetlbfs.so HUGETLB_MORECORE=1g ./mppttest $k $i 
 		sleep 5
 #	done
@@ -61,4 +56,3 @@ done
 	echo $RST >> $OUTPUT2
 #done
 
-#rm mppttest*.log

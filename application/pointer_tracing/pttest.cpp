@@ -112,21 +112,6 @@ void tracingTask(Worker *me, void *arg) {
 				for (int k = 0; k < LOCAL_NUM; k++) {
 					accum += localList->data[k];
 				}
-				/*accum += localList->data[0];
-				accum += localList->data[1];
-				accum += localList->data[2];
-				accum += localList->data[3];
-				accum += localList->data[4];
-				accum += localList->data[5];
-				accum += localList->data[6];
-				accum += localList->data[7];
-				accum += localList->data[8];
-				accum += localList->data[9];
-				accum += localList->data[10];
-				accum += localList->data[11];
-				accum += localList->data[12];
-				accum += localList->data[13];
-				*/
 			} 
 			times++;
 			localList = localList->next;

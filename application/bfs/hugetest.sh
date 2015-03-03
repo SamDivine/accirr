@@ -2,12 +2,8 @@
 
 COROS=64
 GAPS="1 8"
-FILENAME=graph_23_16
+FILENAME=graph_22_16
 SOURCE=0
-
-make clean
-
-make
 
 for gap in $GAPS; do
 OUTPUT="bfs_gap${gap}.txt"
@@ -19,7 +15,7 @@ fi
 for i in $(seq $COROS); do
 	let "k=i*gap"
 	echo run bfs with input $FILENAME, source $SOURCE, coros $k
-	./bfs $FILENAME $SOURCE $k >> $OUTPUT
+	LD_PRELOAD=../../lib/libhugetlbfs.so HUGETLB_MORECORE=1g ./bfs $FILENAME $SOURCE $k >> $OUTPUT
 done
 
 done

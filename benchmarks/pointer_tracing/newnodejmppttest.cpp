@@ -12,7 +12,7 @@ int LIST_LEN = (1<<15);
 int REPEAT_TIMES = 1;
 
 #ifndef LOCAL_NUM
-#define LOCAL_NUM 12
+#define LOCAL_NUM 14
 #endif
 
 #ifndef MODE
@@ -144,7 +144,9 @@ void tracingTask() {
 				}
 			}
 			times++;
-			__builtin_prefetch(localList->jp->data, MODE, LOCALITY);
+			if (localList->jp) {
+				__builtin_prefetch(localList->jp->data, MODE, LOCALITY);
+			}
 			localList = localList->next;
 		}
 	}

@@ -4,16 +4,16 @@
 
 #include "customcounters.h"
 
-int total_switch = 0;
-int total_accum = 0;
+int64_t total_switch = 0;
+int64_t total_accum = 0;
 
 int64_t TOTAL_TASKS = 64;
 int64_t TOTAL_SWITCH = (1<<28);
 
 void mytask(Worker *me, void *arg) {
-	int accumNum;
+	int accumNum = 0;
 	while(total_switch <= TOTAL_SWITCH) {
-		accumNum = rand();
+		accumNum++;
 		if (accumNum%3 == 0) {
 			yield();
 			total_switch++;

@@ -9,7 +9,7 @@ MODE := -DPREFECH_MODE=1
 LOCALICY := -DPREFETCH_LOCALITY=2
 
 CXXFLAGS += $(PREFETCH) $(MODE) $(LOCALICY) -pthread -lrt -DUSING_MALLOC -DCORO_DEBUG
-TARGET=pointer_tracing old_pointer_tracing pttest mppttest pcm_pttest mtpttest loadspttest
+TARGET=pointer_tracing old_pointer_tracing pttest mppttest pcm_pttest mtpttest loadspttest newnodepttest
 
 all:$(TARGET)
 
@@ -26,6 +26,8 @@ pcm_pttest:$(DEPEND) $(LIB) $(PCM_DEPEND)
 mtpttest:$(DEPEND) $(LIB)
 
 loadspttest:$(DEPEND) $(LIB)
+
+newnodepttest:$(DEPEND) $(LIB)
 
 
 .PHONY:clean

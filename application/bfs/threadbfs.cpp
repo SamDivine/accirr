@@ -1,4 +1,3 @@
-#include "Accirr.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,8 +14,6 @@ using namespace std;
 #ifndef LOCALITY
 #define LOCALITY 2
 #endif
-
-int MAX_COROS = 2;
 
 int* vertexIndex;
 int* edgeData;
@@ -36,7 +33,7 @@ int* parent;
 
 struct timeval start, end;
 
-int realCoros = 2;
+int realCoros = 1;
 
 void getGraph(char* filename) {
 	FILE *fp = fopen(filename, "r");
@@ -110,34 +107,21 @@ void getGraph(char* filename) {
 #endif
 }
 
-void spreadTask(Worker *me, void *arg) {
-	intptr_t idx = (intptr_t)arg;
+void spreadTask() {
+	int idx = 0;
 	int pointsPerCoro = cQLen/realCoros;
 	int remainder = cQLen%realCoros;
 	int mIdx = idx*pointsPerCoro + (idx>=remainder ? remainder : idx);
 	int nextIdx = mIdx + pointsPerCoro + (idx>=remainder ? 0 : 1);
-	//cerr << "cQLen=" << cQLen << ",idx=" << idx << ",midx=" << mIdx << ", nextIdx=" << nextIdx << endl;
 	for (int i = mIdx; i < nextIdx; i++) {
 		int mVertex = currentQ[i];
-#ifdef DATA_PREFETCH
-		//__builtin_prefetch(&vertexIndex[mVertex], MODE, LOCALITY);
-		//yield();
-#endif
 		int mVertexIndex = vertexIndex[mVertex];
 		int nextVertexIndex = (mVertex+1 < vertexNum) ? vertexIndex[mVertex+1] : vertexNum;
-#ifdef DATA_PREFETCH
-		__builtin_prefetch(&linkedList[mVertexIndex], MODE, LOCALITY);
-		yield();
-#endif
 		for (int j = mVertexIndex; j < nextVertexIndex; j++) {
 			int v = linkedList[j];
 			if (v == source) {
 				continue;
 			}
-#ifdef DATA_PREFETCH
-			//__builtin_prefetch(&parent[v], MODE, LOCALITY);
-			//yield();
-#endif
 			if (parent[v] == -1) {
 				parent[v] = mVertex;
 				nextQ[nQLen++] = v;
@@ -166,11 +150,7 @@ void bfs() {
 	currentQ[cQLen++] = source;
 	int level = 0;
 	while (cQLen != 0) {
-		realCoros = cQLen < MAX_COROS ? cQLen : MAX_COROS;
-		for (intptr_t i = 0; i < realCoros; i++) {
-			createTask(spreadTask, (void*)i);
-		}
-		AccirrRun();
+		spreadTask();
 		for (int i = 0; i < nQLen; i++) {
 			currentQ[i] = nextQ[i];
 		}
@@ -224,11 +204,9 @@ int bindProc(int bindid) {
 int main(int argc, char** argv)
 {
 	source = atoi(argv[2]);
-	MAX_COROS = atoi(argv[3]);
 	bindProc(0);
 	gettimeofday(&start, NULL);
 	getGraph(argv[1]);
-	AccirrInit(&argc, &argv);
 	gettimeofday(&end, NULL);
 	double duration = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec)/1000000.0;
 	cerr << "get Graph takes " << duration << " s" << endl;
@@ -238,7 +216,6 @@ int main(int argc, char** argv)
 	duration = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec)/1000000.0;
 	cerr << "bfs " << duration << " s" << endl;
 	cout << "bfs " << duration << " s" << endl;
-	AccirrFinalize();
 	//srand((unsigned)time(NULL));
 	printPath(rand()%vertexNum);
 	finalize();

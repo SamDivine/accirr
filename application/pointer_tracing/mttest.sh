@@ -4,7 +4,7 @@ MODE=1
 LOCALITY=2
 
 COROS=64
-PROCS="4 6 8 10 12 14"
+PROCS="2 4 6 8 10 12 14"
 GAP="1 8 64"
 
 for mode in $MODE; do
@@ -13,11 +13,16 @@ for mode in $MODE; do
 			OUTPUT1="mtpttest_arithmatic_hugepage_gap"${gap}"_m"$mode"l"$locality".csv"
 			OUTPUT2="mtpttest_harmonic_hugepage_gap"${gap}"_m"$mode"l"$locality".csv"
 
+			OUTPUTL="mtpttest_longest_hugepage_gap"${gap}"_m"$mode"l"$locality".csv"
+
 			if [ -e $OUTPUT1 ]; then
 				rm $OUTPUT1
 			fi
 			if [ -e $OUTPUT2 ]; then
 				rm $OUTPUT2
+			fi
+			if [ -e $OUTPUTL ]; then
+				rm $OUTPUTL
 			fi
 			RST=""
 
@@ -28,6 +33,7 @@ for mode in $MODE; do
 
 			echo $RST >> $OUTPUT1
 			echo $RST >> $OUTPUT2
+			echo $RST >> $OUTPUTL
 
 			./gen.sh $mode $locality
 			for c in $(seq $COROS); do
@@ -56,7 +62,14 @@ for mode in $MODE; do
 				done
 				echo $RST >> $OUTPUT2
 			done
-
+			for k in $PROCS; do
+				RST=proc${k}
+				for c in $(seq $COROS); do
+					let "i=c*gap"
+					RST=$RST","`cat mtpttest_${i}_${k}_*.log | awk 'BEGIN {time=0;} {if ($3>time){time=$3;}} END {printf("%.2f", time);}'`
+				done
+				echo $RST >> $OUTPUTL
+			done	
 		done
 	done
 done

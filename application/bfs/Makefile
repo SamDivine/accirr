@@ -1,8 +1,8 @@
 include ../Makefile
 
-CXXFLAGS += -DDATA_PREFETCH
+CXXFLAGS += -DDATA_PREFETCH -DCORO_DEBUG
 
-TARGET=bfs naivebfs mpbfs
+TARGET=bfs naivebfs mpbfs threadbfs
 
 all:$(TARGET)
 

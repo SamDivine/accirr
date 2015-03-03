@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -131,9 +132,19 @@ void finalize() {
 
 int main(int argc, char** argv)
 {
+	struct timeval start, end;
 	source = atoi(argv[2]);
+	gettimeofday(&start, NULL);
 	getGraph(argv[1]);
+	gettimeofday(&end, NULL);
+	double duration = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec)/1000000.0;
+	cerr << "get Graph takes " << duration << " s" << endl;
+	gettimeofday(&start, NULL);
 	bfs(source);
+	gettimeofday(&end, NULL);
+	duration = (end.tv_sec-start.tv_sec)+(end.tv_usec-start.tv_usec)/1000000.0;
+	cerr << "bfs " << duration << " s" << endl;
+	cout << "bfs " << duration << " s" << endl;
 	printPath(rand()%vertexNum);
 	finalize();
 	return 0;
